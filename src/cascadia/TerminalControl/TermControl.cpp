@@ -122,8 +122,8 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
         // DON'T CALL _InitializeTerminal here - wait until the swap chain is loaded to do that.
 
         // Subscribe to the connection's disconnected event and call our connection closed handlers.
-        _connection.TerminalDisconnected([=]() {
-            _connectionClosedHandlers();
+        _connection.TerminalDisconnected([=](auto&& arg) {
+            _connectionClosedHandlers(arg);
         });
     }
 
@@ -1221,6 +1221,11 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
 
         // send paste event up to TermApp
         _clipboardPasteHandlers(*this, *pasteArgs);
+    }
+
+    void TermControl::WriteOutput(hstring output)
+    {
+        _terminal->Write(output.c_str());
     }
 
     void TermControl::Close()

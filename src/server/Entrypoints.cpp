@@ -163,7 +163,7 @@
 
         // Call create process
         wil::unique_process_information ProcessInformation;
-        RETURN_IF_WIN32_BOOL_FALSE(CreateProcessW(NULL,
+        auto createProcessResult = CreateProcessW(NULL,
                                                   CmdLineMutable.get(),
                                                   NULL,
                                                   NULL,
@@ -172,7 +172,23 @@
                                                   NULL,
                                                   NULL,
                                                   &StartupInformation.StartupInfo,
-                                                  ProcessInformation.addressof()));
+                                                  ProcessInformation.addressof());
+
+        if (FALSE == createProcessResult)
+        {
+            ExitProcess(HRESULT_FROM_WIN32(GetLastError()));
+        }
+
+        while (true)
+        {
+            DWORD dwExitCode{ 0 };
+            WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+            THROW_LAST_ERROR_IF(0 == GetExitCodeProcess(ProcessInformation.hProcess, &dwExitCode));
+            if (dwExitCode != STILL_ACTIVE)
+            {
+                ExitProcess(dwExitCode);
+            }
+        }
     }
 
     // Exit the thread so the CRT won't clean us up and kill. The IO thread owns the lifetime now.

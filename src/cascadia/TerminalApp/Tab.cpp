@@ -15,8 +15,8 @@ Tab::Tab(const GUID& profile, const TermControl& control)
 {
     _rootPane = std::make_shared<Pane>(profile, control, true);
 
-    _rootPane->Closed([=]() {
-        _closedHandlers();
+    _rootPane->Closed([=](auto&& arg) {
+        _closedHandlers(arg);
     });
 
     _MakeTabViewItem();

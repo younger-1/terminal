@@ -90,7 +90,7 @@ private:
     void _CloseChild(const bool closeFirst);
 
     void _FocusFirstChild();
-    void _ControlClosedHandler();
+    void _ControlClosedHandler(int32_t exitCode);
 
     std::pair<float, float> _GetPaneSizes(const float& fullSize);
 

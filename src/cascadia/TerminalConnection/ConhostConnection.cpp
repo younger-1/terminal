@@ -205,7 +205,10 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
                     return 0;
                 }
 
-                _disconnectHandlers();
+                WaitForSingleObject(_piConhost.hProcess, INFINITE);
+                DWORD dwExitCode{ 0 };
+                GetExitCodeProcess(_piConhost.hProcess, &dwExitCode);
+                _disconnectHandlers(dwExitCode);
                 return (DWORD)-1;
             }
 

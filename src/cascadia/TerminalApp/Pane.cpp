@@ -286,7 +286,7 @@ bool Pane::NavigateFocus(const Direction& direction)
 // - <none>
 // Return Value:
 // - <none>
-void Pane::_ControlClosedHandler()
+void Pane::_ControlClosedHandler(int32_t exitCode)
 {
     std::unique_lock lock{ _createCloseLock };
     // It's possible that this event handler started being executed, then before
@@ -301,10 +301,20 @@ void Pane::_ControlClosedHandler()
         return;
     }
 
-    if (_control.ShouldCloseOnExit())
+    //if (_control.ShouldCloseOnExit())
+    //{
+    // Fire our Closed event to tell our parent that we should be removed.
+    //_closedHandlers();
+    //}
+    if (exitCode == 0)
     {
-        // Fire our Closed event to tell our parent that we should be removed.
-        _closedHandlers();
+        _closedHandlers(0);
+    }
+    else
+    {
+        wchar_t buffer[1024];
+        StringCchPrintfW(buffer, 1024, L"\n[process exited with code %8.08x]", exitCode);
+        _control.WriteOutput(buffer);
     }
 }
 
@@ -317,7 +327,7 @@ void Pane::_ControlClosedHandler()
 void Pane::Close()
 {
     // Fire our Closed event to tell our parent that we should be removed.
-    _closedHandlers();
+    _closedHandlers(0);
 }
 
 // Method Description:
@@ -654,13 +664,13 @@ void Pane::_CloseChild(const bool closeFirst)
 // - <none>
 void Pane::_SetupChildCloseHandlers()
 {
-    _firstClosedToken = _firstChild->Closed([this]() {
+    _firstClosedToken = _firstChild->Closed([this](auto&& arg) {
         _root.Dispatcher().RunAsync(CoreDispatcherPriority::Normal, [=]() {
             _CloseChild(true);
         });
     });
 
-    _secondClosedToken = _secondChild->Closed([this]() {
+    _secondClosedToken = _secondChild->Closed([this](auto&& arg) {
         _root.Dispatcher().RunAsync(CoreDispatcherPriority::Normal, [=]() {
             _CloseChild(false);
         });

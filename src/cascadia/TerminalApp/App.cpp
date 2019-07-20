@@ -939,7 +939,7 @@ namespace winrt::TerminalApp::implementation
         tabViewItem.PointerPressed({ this, &App::_OnTabClick });
 
         // When the tab is closed, remove it from our list of tabs.
-        newTab->Closed([tabViewItem, this]() {
+        newTab->Closed([tabViewItem, this](auto&& arg) {
             _tabView.Dispatcher().RunAsync(CoreDispatcherPriority::Normal, [tabViewItem, this]() {
                 _RemoveTabViewItem(tabViewItem);
             });

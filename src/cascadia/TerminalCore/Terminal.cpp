@@ -202,7 +202,7 @@ void Terminal::Write(std::wstring_view stringView)
 // - true if we translated the key event, and it should not be processed any further.
 // - false if we did not translate the key, and it should be processed into a character.
 bool Terminal::SendKeyEvent(const WORD vkey, const ControlKeyStates states)
-{
+
     if (_snapOnInput && _scrollOffset != 0)
     {
         auto lock = LockForWriting();
