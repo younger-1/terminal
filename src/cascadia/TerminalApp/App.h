@@ -36,7 +36,7 @@ namespace winrt::TerminalApp::implementation
         hstring GetTitle();
 
         // -------------------------------- WinRT Events ---------------------------------
-        DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(SetTitleBarContent, _setTitleBarContentHandlers, TerminalApp::App, winrt::Windows::UI::Xaml::UIElement);
+        DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(SetTitleBarContent, _setTitleBarContentHandlers, winrt::Windows::Foundation::IInspectable, winrt::Windows::UI::Xaml::UIElement);
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(RequestedThemeChanged, _requestedThemeChangedHandlers, TerminalApp::App, winrt::Windows::UI::Xaml::ElementTheme);
 
     private:
@@ -68,9 +68,6 @@ namespace winrt::TerminalApp::implementation
         void _ApplyTheme(const Windows::UI::Xaml::ElementTheme& newTheme);
 
         void _OnLoaded(const IInspectable& sender, const Windows::UI::Xaml::RoutedEventArgs& eventArgs);
-
-        winrt::event_token SetTitleBarContent(Windows::Foundation::TypedEventHandler<TerminalApp::App, winrt::Windows::UI::Xaml::UIElement> const& handler);
-        void SetTitleBarContent(winrt::event_token const& token) noexcept;
     };
 }
 
