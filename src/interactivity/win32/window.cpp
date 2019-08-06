@@ -216,6 +216,7 @@ void Window::_UpdateSystemMetrics() const
         if (useDx)
         {
             pDxEngine = new DxEngine();
+            THROW_IF_FAILED(pDxEngine->Init());
             // TODO: MSFT:21255595 make this less gross
             // Manually set the Dx Engine to Hwnd mode. When we're trying to
             // determine the initial window size, which happens BEFORE the

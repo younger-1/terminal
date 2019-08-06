@@ -32,12 +32,12 @@ FontInfo::FontInfo(const FontInfo& fiFont) :
 {
 }
 
-COORD FontInfo::GetUnscaledSize() const
+COORD FontInfo::GetUnscaledSize() const noexcept
 {
     return _coordSizeUnscaled;
 }
 
-COORD FontInfo::GetSize() const
+COORD FontInfo::GetSize() const noexcept
 {
     return _coordSize;
 }

@@ -37,8 +37,8 @@ public:
 
     FontInfo(const FontInfo& fiFont);
 
-    COORD GetSize() const;
-    COORD GetUnscaledSize() const;
+    COORD GetSize() const noexcept;
+    COORD GetUnscaledSize() const noexcept;
 
     void SetFromEngine(_In_ PCWSTR const pwszFaceName,
                        const BYTE bFamily,

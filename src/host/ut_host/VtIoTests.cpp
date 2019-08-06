@@ -381,6 +381,7 @@ void VtIoTests::RendererDtorAndThreadAndDx()
         VERIFY_SUCCEEDED(pThread->Initialize(pRenderer.get()));
 
         auto dxEngine = std::make_unique<::Microsoft::Console::Render::DxEngine>();
+        THROW_IF_FAILED(dxEngine->Init());
         pRenderer->AddRenderEngine(dxEngine.get());
         // Sleep for a hot sec to make sure the thread starts before we enable painting
         // If you don't, the thread might wait on the paint enabled event AFTER

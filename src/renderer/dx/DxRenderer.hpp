@@ -30,8 +30,15 @@ namespace Microsoft::Console::Render
     class DxEngine final : public RenderEngineBase
     {
     public:
-        DxEngine();
-        virtual ~DxEngine() override;
+        DxEngine() noexcept;
+        ~DxEngine();
+
+        DxEngine(const DxEngine&) = delete;
+        DxEngine(DxEngine&&) = delete;
+        DxEngine& operator=(const DxEngine&) = delete;
+        DxEngine& operator=(DxEngine&&) = delete;
+
+        [[nodiscard]] HRESULT Init() noexcept;
 
         // Used to release device resources so that another instance of
         // conhost can render to the screen (i.e. only one DirectX
@@ -45,7 +52,7 @@ namespace Microsoft::Console::Render
 
         void SetCallback(std::function<void()> pfn);
 
-        ::Microsoft::WRL::ComPtr<IDXGISwapChain1> GetSwapChain() noexcept;
+        ::Microsoft::WRL::ComPtr<IDXGISwapChain1> GetSwapChain();
 
         // IRenderEngine Members
         [[nodiscard]] HRESULT Invalidate(const SMALL_RECT* const psrRegion) noexcept override;
@@ -84,7 +91,7 @@ namespace Microsoft::Console::Render
 
         [[nodiscard]] HRESULT GetProposedFont(const FontInfoDesired& fiFontInfoDesired, FontInfo& fiFontInfo, int const iDpi) noexcept override;
 
-        [[nodiscard]] SMALL_RECT GetDirtyRectInChars() noexcept override;
+        [[nodiscard]] SMALL_RECT GetDirtyRectInChars() override;
 
         [[nodiscard]] HRESULT GetFontSize(_Out_ COORD* const pFontSize) noexcept override;
         [[nodiscard]] HRESULT IsGlyphWideByFont(const std::wstring_view glyph, _Out_ bool* const pResult) noexcept override;
@@ -167,7 +174,7 @@ namespace Microsoft::Console::Render
 
         [[nodiscard]] HRESULT _PrepareRenderTarget() noexcept;
 
-        void _ReleaseDeviceResources() noexcept;
+        void _ReleaseDeviceResources();
 
         [[nodiscard]] HRESULT _CreateTextLayout(
             _In_reads_(StringLength) PCWCHAR String,
@@ -185,14 +192,14 @@ namespace Microsoft::Console::Render
                                                                                               std::wstring& localeName) const;
 
         [[nodiscard]] ::Microsoft::WRL::ComPtr<IDWriteFontFace1> _FindFontFace(std::wstring& familyName,
-                                                                               DWRITE_FONT_WEIGHT& weight,
-                                                                               DWRITE_FONT_STRETCH& stretch,
-                                                                               DWRITE_FONT_STYLE& style,
+                                                                               const DWRITE_FONT_WEIGHT& weight,
+                                                                               const DWRITE_FONT_STRETCH& stretch,
+                                                                               const DWRITE_FONT_STYLE& style,
                                                                                std::wstring& localeName) const;
 
         [[nodiscard]] std::wstring _GetLocaleName() const;
 
-        [[nodiscard]] std::wstring _GetFontFamilyName(IDWriteFontFamily* const fontFamily,
+        [[nodiscard]] std::wstring _GetFontFamilyName(gsl::not_null<IDWriteFontFamily*> fontFamily,
                                                       std::wstring& localeName) const;
 
         [[nodiscard]] HRESULT _GetProposedFont(const FontInfoDesired& desired,
@@ -208,6 +215,6 @@ namespace Microsoft::Console::Render
 
         [[nodiscard]] D2D1_COLOR_F _ColorFFromColorRef(const COLORREF color) noexcept;
 
-        [[nodiscard]] static DXGI_RGBA s_RgbaFromColorF(const D2D1_COLOR_F color) noexcept;
+        [[nodiscard]] static constexpr DXGI_RGBA s_RgbaFromColorF(const D2D1_COLOR_F color) noexcept;
     };
 }

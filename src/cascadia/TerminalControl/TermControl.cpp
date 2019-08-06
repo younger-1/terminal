@@ -395,6 +395,7 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
 
         // Set up the DX Engine
         auto dxEngine = std::make_unique<::Microsoft::Console::Render::DxEngine>();
+        THROW_IF_FAILED(dxEngine->Init());
         _renderer->AddRenderEngine(dxEngine.get());
 
         // Set up the renderer to be used to calculate the width of a glyph,
@@ -1532,6 +1533,7 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
         // TODO: MSFT:21254947 - use a static function to do this instead of
         // instantiating a DxEngine
         auto dxEngine = std::make_unique<::Microsoft::Console::Render::DxEngine>();
+        THROW_IF_FAILED(dxEngine->Init());
         THROW_IF_FAILED(dxEngine->UpdateDpi(dpi));
         THROW_IF_FAILED(dxEngine->UpdateFont(desiredFont, actualFont));
 
