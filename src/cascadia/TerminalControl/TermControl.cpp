@@ -377,6 +377,11 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
         const auto windowWidth = _swapChainPanel.ActualWidth(); // Width() and Height() are NaN?
         const auto windowHeight = _swapChainPanel.ActualHeight();
 
+        if (windowWidth == 0.0 || windowHeight == 0.0)
+        {
+            return;
+        }
+
         _terminal = std::make_unique<::Microsoft::Terminal::Core::Terminal>();
 
         // First create the render thread.
@@ -1224,7 +1229,8 @@ namespace winrt::Microsoft::Terminal::TerminalControl::implementation
     {
         if (!_initializedTerminal)
         {
-            return;
+            _InitializeTerminal();
+            //return;
         }
 
         auto lock = _terminal->LockForWriting();
