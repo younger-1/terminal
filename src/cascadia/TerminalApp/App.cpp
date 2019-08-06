@@ -23,6 +23,7 @@ namespace winrt
 {
     namespace MUX = Microsoft::UI::Xaml;
     using IInspectable = Windows::Foundation::IInspectable;
+    namespace Foundation = ::winrt::Windows::Foundation;
 }
 
 namespace winrt::TerminalApp::implementation
@@ -94,7 +95,8 @@ namespace winrt::TerminalApp::implementation
         });
         _tabView.SelectionChanged({ this, &App::_OnTabSelectionChanged });
         _tabView.TabClosing({ this, &App::_OnTabClosing });
-        _tabView.Items().VectorChanged({ this, &App::_OnTabItemsChanged });
+        
+        _tabView.Items().as<Foundation::Collections::IObservableVector<Foundation::IInspectable>>().VectorChanged({ this, &App::_OnTabItemsChanged });
         _root.Loaded({ this, &App::_OnLoaded });
 
         _CreateNewTabFlyout();
@@ -1097,8 +1099,7 @@ namespace winrt::TerminalApp::implementation
     // - eventArgs: the event's constituent arguments
     void App::_OnTabSelectionChanged(const IInspectable& sender, const Controls::SelectionChangedEventArgs& eventArgs)
     {
-        auto tabView = sender.as<MUX::Controls::TabView>();
-        auto selectedIndex = tabView.SelectedIndex();
+        auto selectedIndex = _tabView.SelectedIndex();
 
         // Unfocus all the tabs.
         for (auto tab : _tabs)
