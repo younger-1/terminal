@@ -206,7 +206,7 @@ void AppHost::_HandleCreateWindow(const HWND hwnd, const RECT proposedRect)
 // - arg: the UIElement to use as the new Titlebar content.
 // Return Value:
 // - <none>
-void AppHost::_UpdateTitleBarContent(const winrt::TerminalApp::App&, const winrt::Windows::UI::Xaml::UIElement& arg)
+void AppHost::_UpdateTitleBarContent(const winrt::Windows::Foundation::IInspectable&, const winrt::Windows::UI::Xaml::UIElement& arg)
 {
     if (_useNonClientArea)
     {

@@ -63,7 +63,7 @@ namespace winrt::TerminalApp::implementation
         terminalPage->Create();
 
         // This is a work around for winrt events not working in TerminalPage
-        if (_settings->GlobalSettings().GetShowTabsInTitlebar())
+        /*if (_settings->GlobalSettings().GetShowTabsInTitlebar())
         {
             // Remove the TabView from the page. We'll hang on to it, we need to
             // put it in the titlebar.
@@ -76,7 +76,7 @@ namespace winrt::TerminalApp::implementation
 
             // Inform the host that our titlebar content has changed.
             _setTitleBarContentHandlers(*this, tabRow);
-        }
+        }*/
     }
 
     UIElement App::GetRoot() noexcept
