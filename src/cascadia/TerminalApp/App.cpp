@@ -38,6 +38,12 @@ namespace winrt::TerminalApp::implementation
 
         // Initialize will become protected or be deleted when GH#1339 (workaround for MSFT:22116519) are fixed.
         Initialize();
+
+        // The TerminalPage has to be constructed during our construction, to
+        // make sure that there's a terminal page for callers of
+        // SetTitleBarContent
+        auto terminalPage = winrt::make_self<TerminalPage>();
+        _root = terminalPage.as<winrt::Windows::UI::Xaml::Controls::Control>();
     }
 
     // Method Description:
@@ -55,12 +61,13 @@ namespace winrt::TerminalApp::implementation
         // this as a MTA, before the app is Create()'d
         WINRT_ASSERT(_loadedInitialSettings);
 
-        auto terminalPage = winrt::make_self<TerminalPage>();
-        terminalPage->SetSettings(_settings.get());
-        _root = terminalPage.as<winrt::Windows::UI::Xaml::Controls::Control>();
 
         _root.Loaded({ this, &App::_OnLoaded });
-        terminalPage->Create();
+        if (auto terminalPage = _root.try_as<TerminalPage>())
+        {
+            terminalPage->SetSettings(_settings.get());
+            terminalPage->Create();
+        }
 
         // This is a work around for winrt events not working in TerminalPage
         /*if (_settings->GlobalSettings().GetShowTabsInTitlebar())
