@@ -145,6 +145,12 @@ public:
                                            std::function<COLORREF(TextAttribute&)> GetForegroundColor,
                                            std::function<COLORREF(TextAttribute&)> GetBackgroundColor) const;
 
+    static std::string GenHTML(const TextAndColor& rows,
+                               const int fontHeightPoints,
+                               const PCWCHAR fontFaceName,
+                               const COLORREF backgroundColor,
+                               const std::string& htmlTitle);
+
 private:
     std::deque<ROW> _storage;
     Cursor _cursor;
