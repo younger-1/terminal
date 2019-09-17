@@ -119,7 +119,7 @@
           Outputs="$(OutDir)$(TargetName).manifest"
           DependsOnTargets="_ConsoleGenerateAdditionalWinmdManifests">
 
-    <Exec Command="mt.exe -manifest @(_ConsoleWinmdManifest, ' -manifest ') -out:$(OutDir)$(TargetName).manifest" />
+    <Exec Command="mt.exe -manifest TerminalApp.LocalTests.manifest -manifest @(_ConsoleWinmdManifest, ' -manifest ') -out:$(OutDir)$(TargetName).manifest" />
   </Target>
 
   <!-- Step 2: Take our combined SxS manifest, and use it to build an

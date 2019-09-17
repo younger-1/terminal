@@ -45,6 +45,7 @@ namespace TerminalAppLocalTests
         TEST_METHOD(TestAllValidationsWithNullGuids);
         TEST_METHOD(TestReorderWithNullGuids);
         TEST_METHOD(TestReorderingWithoutGuid);
+        TEST_METHOD(TryInitXamlIslands);
 
         TEST_CLASS_SETUP(ClassSetup)
         {
@@ -61,6 +62,21 @@ namespace TerminalAppLocalTests
         settings.FontSize(oldFontSize + 5);
         auto newFontSize = settings.FontSize();
         VERIFY_ARE_NOT_EQUAL(oldFontSize, newFontSize);
+    }
+
+    void SettingsTests::TryInitXamlIslands()
+    {
+        winrt::Windows::UI::Xaml::Hosting::WindowsXamlManager _manager{ nullptr };
+        winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _source{ nullptr };
+
+        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        // Initialize the Xaml Hosting Manager
+        DebugBreak();
+        _manager = winrt::Windows::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
+        _source = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
+        // Ensures that XAML Islands was initialized correctly
+        VERIFY_IS_NOT_NULL(_manager);
+        VERIFY_IS_NOT_NULL(_source);
     }
 
     void SettingsTests::ValidateProfilesExist()
