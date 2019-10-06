@@ -63,6 +63,7 @@ public:
     bool HasConnectionType() const noexcept;
     GUID GetConnectionType() const noexcept;
 
+    void SetGuid(GUID guid) noexcept { _guid = guid; }
     void SetFontFace(std::wstring fontFace) noexcept;
     void SetColorScheme(std::optional<std::wstring> schemeName) noexcept;
     void SetTabTitle(std::wstring tabTitle) noexcept;
