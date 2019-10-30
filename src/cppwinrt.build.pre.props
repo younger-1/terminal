@@ -16,6 +16,10 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <!-- Work around the WAP packaging project (collapse the wave function) -->
+    <!-- I hope the globals work like this, and it doesn't decide to rebuild because the globals
+         were different but the raw values were the same, but honestly given it's VS it probably will rebuild. -->
+    <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
   </PropertyGroup>
 
   <!-- These settings tell MsBuild to treat the project as a "Universal Windows"
