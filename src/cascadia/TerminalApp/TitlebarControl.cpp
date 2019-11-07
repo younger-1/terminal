@@ -34,6 +34,24 @@ namespace winrt::TerminalApp::implementation
         ContentRoot().Content(content);
     }
 
+    // <<<<<<< HEAD
+    // =======
+    //     void TitlebarControl::Root_SizeChanged(const IInspectable& /*sender*/,
+    //                                            const Windows::UI::Xaml::SizeChangedEventArgs& /*e*/)
+    //     {
+    //         const auto windowWidth = ActualWidth();
+    //         const auto minMaxCloseWidth = MinMaxCloseControl().ActualWidth();
+    //         const auto dragBarMinWidth = DragBar().MinWidth();
+    //         const auto maxWidth = windowWidth - minMaxCloseWidth - dragBarMinWidth;
+    //         // Only set our MaxWidth if it's greater than 0. Setting it to a
+    //         // negative value will cause a crash.
+    //         if (maxWidth >= 0)
+    //         {
+    //             ContentRoot().MaxWidth(maxWidth);
+    //         }
+    //     }
+
+    // >>>>>>> origin/master
     void TitlebarControl::_OnMaximizeOrRestore(byte flag)
     {
         POINT point1 = {};
@@ -51,12 +69,20 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    void TitlebarControl::Maximize_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const& e)
+    void TitlebarControl::Maximize_Click(winrt::Windows::Foundation::IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
     {
         _OnMaximizeOrRestore(HTMAXBUTTON);
     }
 
-    void TitlebarControl::Minimize_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const& e)
+    // <<<<<<< HEAD
+    // =======
+    //     void TitlebarControl::DragBar_DoubleTapped(winrt::Windows::Foundation::IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& /*e*/)
+    //     {
+    //         _OnMaximizeOrRestore(HTCAPTION);
+    //     }
+    // >>>>>>> origin/master
+
+    void TitlebarControl::Minimize_Click(winrt::Windows::Foundation::IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
     {
         if (_window)
         {
@@ -64,7 +90,7 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    void TitlebarControl::Close_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const& e)
+    void TitlebarControl::Close_Click(winrt::Windows::Foundation::IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
     {
         ::PostMessage(_window, WM_SYSCOMMAND, SC_CLOSE, 0);
     }

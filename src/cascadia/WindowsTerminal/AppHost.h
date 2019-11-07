@@ -26,7 +26,9 @@ private:
 
     void _HandleCreateWindow(const HWND hwnd, RECT proposedRect, winrt::TerminalApp::LaunchMode& launchMode);
     void _UpdateTitleBarContent(const winrt::Windows::Foundation::IInspectable& sender,
-                                const winrt::TerminalApp::TabRowControl& arg);
+                                const winrt::Windows::UI::Xaml::UIElement& arg);
     void _UpdateTheme(const winrt::TerminalApp::App&,
                       const winrt::Windows::UI::Xaml::ElementTheme& arg);
+    void _ToggleFullscreen(const winrt::Windows::Foundation::IInspectable& sender,
+                           const winrt::TerminalApp::ToggleFullscreenEventArgs& arg);
 };
