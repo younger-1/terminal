@@ -10,7 +10,7 @@ namespace TerminalApp
         WindowVisualStateIconified
     };
 
-    [default_interface] runtimeclass TitlebarControl : Windows.UI.Xaml.Controls.Grid
+    [default_interface] runtimeclass TitlebarControl : Windows.UI.Xaml.Controls.RelativePanel
     {
         TitlebarControl(UInt64 parentWindowHandle);
         void SetWindowVisualState(WindowVisualState visualState);

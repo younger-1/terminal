@@ -240,6 +240,11 @@ void NonClientIslandWindow::_UpdateIslandPosition(const UINT windowWidth, const 
 
         _oldIslandPos = { newIslandPos };
     }
+
+    if (_titlebar)
+    {
+        _titlebar.MaxWidth(windowWidth);
+    }
 }
 
 // Method Description:
