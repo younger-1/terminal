@@ -52,7 +52,7 @@ private:
     wil::unique_hbrush _backgroundBrush;
     COLORREF _backgroundBrushColor;
 
-    winrt::Windows::UI::Xaml::Controls::Border _dragBar{ nullptr };
+    // winrt::Windows::UI::Xaml::Controls::Border _dragBar{ nullptr };
     wil::unique_hrgn _dragBarRegion;
 
     winrt::Windows::UI::Xaml::ElementTheme _theme;

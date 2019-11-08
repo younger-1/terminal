@@ -68,9 +68,11 @@ void NonClientIslandWindow::Initialize()
 
     // Create our titlebar control
     _titlebar = winrt::TerminalApp::TitlebarControl{ reinterpret_cast<uint64_t>(GetHandle()) };
-    _dragBar = _titlebar.DragBar();
+    // _dragBar = _titlebar.DragBar();
 
-    _dragBar.SizeChanged({ this, &NonClientIslandWindow::_OnDragBarSizeChanged });
+    // TODO: When we add Content, add a SizeChanged event to that content, and use that to call _OnDragBarSizeChanged
+    // _dragBar.SizeChanged({ this, &NonClientIslandWindow::_OnDragBarSizeChanged });
+
     _rootGrid.SizeChanged({ this, &NonClientIslandWindow::_OnDragBarSizeChanged });
 
     _rootGrid.Children().Append(_titlebar);
@@ -97,6 +99,7 @@ void NonClientIslandWindow::SetContent(winrt::Windows::UI::Xaml::UIElement conte
     if (fwe)
     {
         Controls::Grid::SetRow(fwe, 1);
+        fwe.SizeChanged({ this, &NonClientIslandWindow::_OnDragBarSizeChanged });
     }
 }
 
@@ -129,24 +132,33 @@ int NonClientIslandWindow::_GetTopBorderHeight() const noexcept
 
 RECT NonClientIslandWindow::_GetDragAreaRect() const noexcept
 {
-    if (_dragBar)
+    if (_titlebar)
     {
-        const auto scale = GetCurrentDpiScale();
-        const auto transform = _dragBar.TransformToVisual(_rootGrid);
-        const auto logicalDragBarRect = winrt::Windows::Foundation::Rect{
-            0.0f,
-            0.0f,
-            static_cast<float>(_dragBar.ActualWidth()),
-            static_cast<float>(_dragBar.ActualHeight())
+        // const auto scale = GetCurrentDpiScale();
+        // const auto transform = _dragBar.TransformToVisual(_rootGrid);
+        // const auto logicalDragBarRect = winrt::Windows::Foundation::Rect{
+        //     0.0f,
+        //     0.0f,
+        //     static_cast<float>(_dragBar.Width()),
+        //     static_cast<float>(_dragBar.Height())
+        // };
+        // const auto clientDragBarRect = transform.TransformBounds(logicalDragBarRect);
+        // RECT dragBarRect = {
+        //     static_cast<LONG>(clientDragBarRect.X * scale),
+        //     static_cast<LONG>(clientDragBarRect.Y * scale),
+        //     static_cast<LONG>((clientDragBarRect.Width + clientDragBarRect.X) * scale),
+        //     static_cast<LONG>((clientDragBarRect.Height + clientDragBarRect.Y) * scale),
+        // };
+        // return dragBarRect;
+
+        ////////////////////////////////////////////////////////////////////////
+        auto dragRect = _titlebar.DragRegion();
+        return RECT{
+            gsl::narrow_cast<long>(dragRect.X),
+            gsl::narrow_cast<long>(dragRect.Y),
+            gsl::narrow_cast<long>(dragRect.Width),
+            gsl::narrow_cast<long>(dragRect.Height)
         };
-        const auto clientDragBarRect = transform.TransformBounds(logicalDragBarRect);
-        RECT dragBarRect = {
-            static_cast<LONG>(clientDragBarRect.X * scale),
-            static_cast<LONG>(clientDragBarRect.Y * scale),
-            static_cast<LONG>((clientDragBarRect.Width + clientDragBarRect.X) * scale),
-            static_cast<LONG>((clientDragBarRect.Height + clientDragBarRect.Y) * scale),
-        };
-        return dragBarRect;
     }
 
     return RECT{};
@@ -257,7 +269,7 @@ void NonClientIslandWindow::_UpdateIslandPosition(const UINT windowWidth, const 
 // - <none>
 void NonClientIslandWindow::_UpdateIslandRegion() const
 {
-    if (!_interopWindowHandle || !_dragBar)
+    if (!_interopWindowHandle || !_titlebar)
     {
         return;
     }

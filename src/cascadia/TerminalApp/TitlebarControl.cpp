@@ -39,7 +39,8 @@ namespace winrt::TerminalApp::implementation
     {
         const auto windowWidth = ActualWidth();
         const auto minMaxCloseWidth = MinMaxCloseControl().ActualWidth();
-        const auto dragBarMinWidth = DragBar().MinWidth();
+        // const auto dragBarMinWidth = DragBar().MinWidth();
+        const auto dragBarMinWidth = 45.0f;
         const auto maxWidth = windowWidth - minMaxCloseWidth - dragBarMinWidth;
         // Only set our MaxWidth if it's greater than 0. Setting it to a
         // negative value will cause a crash.
@@ -47,6 +48,27 @@ namespace winrt::TerminalApp::implementation
         {
             ContentRoot().MaxWidth(maxWidth);
         }
+    }
+
+    winrt::Windows::Foundation::Rect TitlebarControl::DragRegion()
+    {
+        const auto windowWidth = ActualWidth();
+        const auto minMaxCloseWidth = MinMaxCloseControl().ActualWidth();
+        const auto dragBarMinWidth = 45.0f;
+
+        const auto maxWidth = windowWidth - minMaxCloseWidth - dragBarMinWidth;
+
+        const auto x = std::min(ContentRoot().ActualWidth(), maxWidth);
+        const auto y = 0.0;
+        const auto w = windowWidth - x - minMaxCloseWidth;
+        const auto h = ActualHeight();
+
+        return winrt::Windows::Foundation::Rect{
+            gsl::narrow_cast<float>(x),
+            gsl::narrow_cast<float>(y),
+            gsl::narrow_cast<float>(w),
+            gsl::narrow_cast<float>(h)
+        };
     }
 
     void TitlebarControl::_OnMaximizeOrRestore(byte flag)
