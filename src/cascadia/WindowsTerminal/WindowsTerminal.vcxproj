@@ -22,6 +22,14 @@
   <Import Project="$(OpenConsoleDir)src\cppwinrt.build.pre.props" />
 
   <ItemDefinitionGroup>
+    <Link>
+      <!-- <ProgramDatabaseFile>$(OutDir)$(TargetName)FullPDB.pdb</ProgramDatabaseFile> -->
+      <SubSystem>Console</SubSystem>
+      <!-- <SetChecksum>true</SetChecksum> -->
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup>
     <ClCompile>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
@@ -140,6 +148,6 @@
       <PackagingOutputs Include="@(_PackagingOutputsFromOtherProjects)" />
     </ItemGroup>
   </Target>
-  
+
   <Import Project="$(OpenConsoleDir)\build\rules\GenerateSxsManifestsFromWinmds.targets" />
 </Project>

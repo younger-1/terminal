@@ -6,6 +6,11 @@
 #include "../types/inc/Viewport.hpp"
 #include "../types/inc/utils.hpp"
 
+#include <iostream> // cout, cerr
+// #include <windows.h> //CommandLineToArgvA
+#include <shellapi.h> //CommandLineToArgvA
+#include "../../dep/args/args.hxx"
+
 using namespace winrt::Windows::UI;
 using namespace winrt::Windows::UI::Composition;
 using namespace winrt::Windows::UI::Xaml;
@@ -19,6 +24,8 @@ AppHost::AppHost() noexcept :
     _logic{ nullptr }, // don't make one, we're going to take a ref on app's
     _window{ nullptr }
 {
+    // _ParseArgs();
+
     _logic = _app.Logic(); // get a ref to app's logic
 
     _useNonClientArea = _logic.GetShowTabsInTitlebar();
