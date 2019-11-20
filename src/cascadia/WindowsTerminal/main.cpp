@@ -327,6 +327,8 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     auto newTabCommand = app.add_subcommand("new-tab", "Create a new tab");
     std::string profileName;
     std::string startingDirectory;
+    std::vector<std::string> commandline;
+    newTabCommand->add_option("cmdline", commandline, "Commandline to run in the given profile");
     newTabCommand->add_option("-p,--profile", profileName, "Open with the give profile");
     newTabCommand->add_option("-d,--startingDirectory", startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
     newTabCommand->callback([&]() {
@@ -345,6 +347,19 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         else
         {
             std::cout << "Use the default startingDirectory" << std::endl;
+        }
+        if (commandline.empty())
+        {
+            std::cout << "Use the default cmdline" << std::endl;
+        }
+        else
+        {
+            auto i = 0;
+            for (auto arg : commandline)
+            {
+                std::cout << "arg[" << i << "]=\"" << arg << "\"\n";
+                i++;
+            }
         }
     });
     ////////////////////////////////////////////////////////////////////////////
