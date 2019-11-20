@@ -1,0 +1,58 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+// #include "pch.h"
+
+struct Cmdline
+{
+    std::vector<std::wstring> wargs;
+    char** _argv = nullptr;
+    size_t argc() const { return wargs.size(); }
+    char** Argv() const { return _argv; }
+    char** BuildArgv()
+    {
+        // If we've already build our array of args, then we don't need to worry
+        // about this. Just return the last one we build.
+        if (_argv)
+        {
+            return _argv;
+        }
+
+        // TODO: This is horrifying
+        _argv = new char*[argc()];
+        for (int i = 0; i < argc(); i++)
+        {
+            auto len = wargs[i].size();
+            _argv[i] = new char[len + 1];
+            for (int j = 0; j <= len; j++)
+            {
+                _argv[i][j] = char(wargs[i][j]);
+            }
+        }
+        return _argv;
+    }
+};
+
+class AppCommandline
+{
+public:
+    AppCommandline();
+    ~AppCommandline() = default;
+    int ParseCommand(const Cmdline& command);
+
+    static std::vector<Cmdline> BuildCommands(int w_argc, wchar_t* w_argv[]);
+
+private:
+    void _BuildParser();
+    bool _NoCommandsProvided();
+    void _ResetStateToDefault();
+
+    CLI::App _app{ "yeet, a test of the wt commandline" };
+    CLI::App* _newTabCommand;
+    CLI::App* _listProfilesCommand;
+
+    std::string _profileName;
+    std::string _startingDirectory;
+    std::vector<std::string> _commandline;
+    // Are you adding more args here? Make sure to reset them in _ResetStateToDefault
+};
