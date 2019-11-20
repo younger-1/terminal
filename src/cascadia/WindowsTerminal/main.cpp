@@ -249,22 +249,26 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
 struct Cmdline
 {
-    // int argc;
     std::vector<std::wstring> wargs;
     char** _argv = nullptr;
-    size_t argc() { return wargs.size(); };
+    size_t argc() const { return wargs.size(); }
+    char** Argv() const { return _argv; }
     char** BuildArgv()
     {
+        // If we've already build our array of args, then we don't need to worry
+        // about this. Just return the last one we build.
         if (_argv)
+        {
             return _argv;
+        }
 
-        // auto argc = argc();
+        // This is horrifying
         _argv = new char*[argc()];
         for (int i = 0; i < argc(); i++)
         {
-            auto lgth = wargs[i].size(); //wcslen(w_argv[i]);
-            _argv[i] = new char[lgth + 1];
-            for (int j = 0; j <= lgth; j++)
+            auto len = wargs[i].size();
+            _argv[i] = new char[len + 1];
+            for (int j = 0; j <= len; j++)
             {
                 _argv[i][j] = char(wargs[i][j]);
             }
@@ -273,22 +277,31 @@ struct Cmdline
     }
 };
 
-int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
+class AppCommandline
 {
-    w_envp;
+public:
+    AppCommandline();
+    ~AppCommandline() = default;
+    int ParseCommand(const Cmdline& command);
 
-    auto originalCommandline = GetCommandLineA();
-    std::cout << "originalCommandline=\"" << originalCommandline << "\"\n";
+private:
+    void _BuildParser();
+    bool _NoCommandsProvided();
 
+    CLI::App _app{ "yeet, a test of the wt commandline" };
+    CLI::App* _newTabCommand;
+    CLI::App* _listProfilesCommand;
+
+    std::string _profileName;
+    std::string _startingDirectory;
+    std::vector<std::string> _commandline;
+};
+
+std::vector<Cmdline> BuildCommands(int w_argc, wchar_t* w_argv[])
+{
     std::wstring cmdSeperator = L";";
-    // bool iterating = true;
-    // while (iterating)
-    // {
-    // }
-    // {
     std::vector<Cmdline> commands;
     commands.emplace_back(Cmdline{});
-    // DebugBreak();
     for (auto i = 0; i < w_argc; i++)
     {
         const auto nextFullArg = std::wstring{ w_argv[i] };
@@ -299,14 +312,13 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         }
         else
         {
-            auto remaining = nextFullArg; //.substr(0, nextDelimiter);
-
+            auto remaining = nextFullArg;
             auto nextArg = remaining.substr(0, nextDelimiter);
             remaining = remaining.substr(nextDelimiter + 1);
             commands.rbegin()->wargs.emplace_back(nextArg);
-
             do
             {
+                // TODO: For delimiters that are escaped, skip them and go to the next
                 nextDelimiter = remaining.find(cmdSeperator);
                 commands.emplace_back(Cmdline{});
                 commands.rbegin()->wargs.emplace_back(std::wstring{ L"wt.exe" });
@@ -317,115 +329,105 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         }
     }
 
-    auto j = 0;
-    for (const auto& cmdline : commands)
+    return commands;
+}
+
+AppCommandline::AppCommandline()
+{
+    _BuildParser();
+}
+
+int AppCommandline::ParseCommand(const Cmdline& command)
+{
+    int localArgc = static_cast<int>(command.argc());
+    auto localArgv = command.Argv();
+
+    // std::cout << "######################### starting command #########################\n";
+    // for (int i = 0; i < localArgc; i++)
+    // {
+    //     char* arg = localArgv[i];
+    //     std::cout << "arg[" << i << "]=\"";
+    //     printf("%s\"\n", arg);
+    // }
+
+    try
     {
-        wprintf(L"Command [%d]\n", j++);
-        auto i = 0;
-        for (const auto& arg : cmdline.wargs)
+        if (localArgc == 2 && (std::string("/?") == localArgv[1] || std::string("-?") == localArgv[1]))
         {
-            std::cout << "arg[" << i << "]=\"";
-            wprintf(L"%s\"\n", arg.data());
-            i++;
+            throw CLI::CallForHelp();
+        }
+        _app.clear();
+        _app.parse(localArgc, localArgv);
+
+        if (_NoCommandsProvided())
+        {
+            // std::cout << "Didn't find _any_ commands, using newTab to parse\n";
+            _newTabCommand->clear();
+            _newTabCommand->parse(localArgc, localArgv);
         }
     }
-    // }
-    // int wargc = 0;
-    // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
-    // wargv;
-    // wargc;
-
-    // char* argv = new char[argc];
-    // for (int i = 0; i < argc; i++)
-    // {
-
-    // }
-
-    // This is horrifying
-    // auto argc = w_argc;
-    // char** argv = new char*[w_argc];
-    // for (int i = 0; i < w_argc; i++)
-    // {
-    //     auto lgth = wcslen(w_argv[i]);
-    //     argv[i] = new char[lgth + 1];
-    //     for (int j = 0; j <= lgth; j++)
-    //     {
-    //         argv[i][j] = char(w_argv[i][j]);
-    //     }
-    // }
-
-    CLI::App app{ "yeet, a test of the wt commandline" };
-    // app.require_subcommand(1);
-    ////////////////////////////////////////////////////////////////////////////
-    // auto add = app.add_subcommand("add", "Add file(s)");
-    // bool add_update;
-    // add->add_flag("-u,--update", add_update, "Add updated files only");
-    // std::vector<std::string> add_files;
-    // add->add_option("files", add_files, "Files to add");
-    // add->callback([&]() {
-    //     std::cout << "Adding:";
-    //     if (add_files.empty())
-    //     {
-    //         if (add_update)
-    //             std::cout << " all updated files";
-    //         else
-    //             std::cout << " all files";
-    //     }
-    //     else
-    //     {
-    //         for (auto file : add_files)
-    //             std::cout << " " << file;
-    //     }
-    // });
-    ////////////////////////////////////////////////////////////////////////////
-    // auto commit = app.add_subcommand("commit", "Commit files");
-    // std::string commit_message;
-    // commit->add_option("-m,--message", commit_message, "A message")->required();
-    // commit->callback([&]() { std::cout << "Commit message: " << commit_message; });
-    ////////////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Remove help flag because it shortcuts all processing
-    // app.set_help_flag();
-    // auto helpOption = app.add_flag("-h,-?,--help", "Print the help message and exit");
-    // Can't add a /? here. That's unfortunate.
-    // auto windowsHelp = app.add_flag("/?", "Print the help message and exit");
-    ////////////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////////////////////////////////////////////////////
-    auto newTabCommand = app.add_subcommand("new-tab", "Create a new tab");
-    std::string profileName;
-    std::string startingDirectory;
-    std::vector<std::string> commandline;
-    newTabCommand->add_option("cmdline", commandline, "Commandline to run in the given profile");
-    newTabCommand->add_option("-p,--profile", profileName, "Open with the give profile");
-    newTabCommand->add_option("-d,--startingDirectory", startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
-    newTabCommand->callback([&]() {
-        std::cout << "######################### new-tab #########################\n";
-        if (!profileName.empty())
+    catch (const CLI::CallForHelp& e)
+    {
+        return _app.exit(e);
+    }
+    catch (const CLI::ParseError& e)
+    {
+        if (_NoCommandsProvided())
         {
-            std::cout << "profileName: " << profileName << std::endl;
+            // std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
+            try
+            {
+                _newTabCommand->clear();
+                _newTabCommand->parse(localArgc, localArgv);
+            }
+            catch (const CLI::ParseError& e)
+            {
+                return _newTabCommand->exit(e);
+            }
+        }
+        else
+        {
+            return _app.exit(e);
+        }
+    }
+    return 0;
+}
+
+void AppCommandline::_BuildParser()
+{
+    // app{ "yeet, a test of the wt commandline" };
+
+    ////////////////////////////////////////////////////////////////////////////
+    _newTabCommand = _app.add_subcommand("new-tab", "Create a new tab");
+    _newTabCommand->add_option("cmdline", _commandline, "Commandline to run in the given profile");
+    _newTabCommand->add_option("-p,--profile", _profileName, "Open with the give profile");
+    _newTabCommand->add_option("-d,--startingDirectory", _startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
+    _newTabCommand->callback([&, this]() {
+        std::cout << "######################### new-tab #########################\n";
+        if (!_profileName.empty())
+        {
+            std::cout << "profileName: " << _profileName << std::endl;
         }
         else
         {
             std::cout << "Use the default profile" << std::endl;
         }
-        if (!startingDirectory.empty())
+        if (!_startingDirectory.empty())
         {
-            std::cout << "startingDirectory: " << startingDirectory << std::endl;
+            std::cout << "startingDirectory: " << _startingDirectory << std::endl;
         }
         else
         {
             std::cout << "Use the default startingDirectory" << std::endl;
         }
-        if (commandline.empty())
+        if (_commandline.empty())
         {
             std::cout << "Use the default cmdline" << std::endl;
         }
         else
         {
             auto i = 0;
-            for (auto arg : commandline)
+            for (auto arg : _commandline)
             {
                 std::cout << "arg[" << i << "]=\"" << arg << "\"\n";
                 i++;
@@ -433,72 +435,31 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         }
     });
     ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    // auto helpCommand = app.add_subcommand("help", "Print the help message and exit");
-    ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    auto listProfilesCommand = app.add_subcommand("list-profiles", "List all the available profiles");
-    ////////////////////////////////////////////////////////////////////////////
 
-    auto noCommandsProvided = [&]() -> bool {
-        return !(*listProfilesCommand || *newTabCommand);
-        // return !(*helpCommand || *newTabCommand);
-        // return !(*helpOption || *helpCommand || *newTabCommand);
-    };
+    ////////////////////////////////////////////////////////////////////////////
+    _listProfilesCommand = _app.add_subcommand("list-profiles", "List all the available profiles");
+    ////////////////////////////////////////////////////////////////////////////
+}
+
+bool AppCommandline::_NoCommandsProvided()
+{
+    return !(*_listProfilesCommand || *_newTabCommand);
+}
+
+int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
+{
+    w_envp;
+
+    auto commands = BuildCommands(w_argc, w_argv);
+    AppCommandline appArgs;
 
     for (auto& cmdBlob : commands)
     {
-        int localArgc = static_cast<int>(cmdBlob.argc());
-        auto localArgv = cmdBlob.BuildArgv();
-
-        std::cout << "######################### starting command #########################\n";
-        for (int i = 0; i < localArgc; i++)
+        cmdBlob.BuildArgv();
+        auto result = appArgs.ParseCommand(cmdBlob);
+        if (result != 0)
         {
-            char* arg = localArgv[i];
-            std::cout << "arg[" << i << "]=\"";
-            printf("%s\"\n", arg);
-        }
-
-        // DebugBreak();
-        try
-        {
-            if (localArgc == 2 && (std::string("/?") == localArgv[1] || std::string("-?") == localArgv[1]))
-            {
-                throw CLI::CallForHelp();
-            }
-            app.clear();
-            app.parse(localArgc, localArgv);
-
-            if (noCommandsProvided())
-            {
-                std::cout << "Didn't find _any_ commands, using newTab to parse\n";
-                newTabCommand->clear();
-                newTabCommand->parse(localArgc, localArgv);
-            }
-        }
-        catch (const CLI::CallForHelp& e)
-        {
-            exit(app.exit(e));
-        }
-        catch (const CLI::ParseError& e)
-        {
-            if (noCommandsProvided())
-            {
-                std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
-                try
-                {
-                    newTabCommand->clear();
-                    newTabCommand->parse(localArgc, localArgv);
-                }
-                catch (const CLI::ParseError& e)
-                {
-                    exit(newTabCommand->exit(e));
-                }
-            }
-            else
-            {
-                exit(app.exit(e));
-            }
+            exit(result);
         }
     }
 
