@@ -5,8 +5,6 @@
 #include "AppHost.h"
 #include "resource.h"
 
-#include "AppCommandline.h"
-
 using namespace winrt;
 using namespace winrt::Windows::UI;
 using namespace winrt::Windows::UI::Composition;
@@ -98,105 +96,7 @@ static void EnsureNativeArchitecture()
     }
 }
 
-// // args::Group arguments("arguments");
-// // args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
-// // args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
-// // args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
-
-// void _ParseArgs(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
-// {
-//     w_envp;
-//     // auto originalCommandline = GetCommandLineW();
-//     // int wargc = 0;
-//     // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
-//     // wargv;
-//     // wargc;
-
-//     // char* argv = new char[argc];
-//     // for (int i = 0; i < argc; i++)
-//     // {
-
-//     // }
-
-//     // This is horrifying
-//     char** argv = new char*[w_argc];
-//     for (int i = 0; i < w_argc; i++)
-//     {
-//         auto lgth = wcslen(w_argv[i]);
-//         argv[i] = new char[lgth + 1];
-//         for (int j = 0; j <= lgth; j++)
-//         {
-//             argv[i][j] = char(w_argv[i][j]);
-//         }
-//     }
-
-//     auto addParser = [&](args::Subparser& parser) {
-//         parser.Parse();
-//         std::cout << "Add";
-//         // for (auto&& path : pathsList)
-//         // {
-//         //     std::cout << ' ' << path;
-//         // }
-//         std::cout << std::endl;
-//     };
-//     auto commitParser = [&](args::Subparser& parser) {
-//         args::ValueFlag<std::string> message(parser, "MESSAGE", "commit message", { 'm' });
-//         parser.Parse();
-//         std::cout << "Commit";
-//         // for (auto&& path : pathsList)
-//         // {
-//         //     std::cout << ' ' << path;
-//         // }
-//         std::cout << std::endl;
-//         if (message)
-//         {
-//             std::cout << "message: " << args::get(message) << std::endl;
-//         }
-//     };
-
-//     args::ArgumentParser rootParser("git-like parser");
-
-//     args::Group commands(rootParser, "commands");
-//     args::Command add(commands, "add", "add file contents to the index", addParser);
-//     args::Command commit(commands, "commit", "record changes to the repository", commitParser);
-
-//     args::Group arguments("arguments");
-//     args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
-//     args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
-//     args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
-
-//     args::GlobalOptions globals(rootParser, arguments);
-
-//     // auto argv = __argv;
-//     // auto argc = __argc;
-//     if (w_argc == 0)
-//     {
-//         std::cout << rootParser;
-//         exit(0);
-//     }
-
-//     try
-//     {
-//         rootParser.ParseCLI(w_argc, argv);
-//         // rootParser.ParseCLI(__argc, __argv);
-//     }
-//     catch (args::Help)
-//     {
-//         std::cout << rootParser;
-//     }
-//     catch (args::Error& e)
-//     {
-//         std::cerr << e.what() << std::endl
-//                   << rootParser;
-//         // return 1;
-//     }
-//     // return 0;
-//     exit(0);
-// }
-int _ParseArgs2(int argc, wchar_t* argv[], wchar_t* envp[]);
-
-// int __stdcall wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
-int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
+int __stdcall wmain(int argc, wchar_t* argv[], wchar_t** /*envp*/)
 {
     TraceLoggingRegister(g_hWindowsTerminalProvider);
     TraceLoggingWrite(
@@ -205,8 +105,6 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
         TraceLoggingDescription("Event emitted immediately on startup"),
         TraceLoggingKeyword(MICROSOFT_KEYWORD_MEASURES),
         TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
-
-    _ParseArgs2(argc, argv, envp);
 
     // Block the user from starting if they launched the incorrect architecture version of the project.
     // This should only be applicable to developer versions. The package installation process
@@ -219,7 +117,7 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
     // Create the AppHost object, which will create both the window and the
     // Terminal App. This MUST BE constructed before the Xaml manager as TermApp
     // provides an implementation of Windows.UI.Xaml.Application.
-    AppHost host;
+    AppHost host{ argc, argv };
 
     // !!! LOAD BEARING !!!
     // This is _magic_. Do the initial loading of our settings *BEFORE* we
@@ -247,49 +145,4 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
         DispatchMessage(&message);
     }
     return 0;
-}
-
-int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
-{
-    w_envp;
-
-    auto commands = AppCommandline::BuildCommands(w_argc, w_argv);
-    AppCommandline appArgs;
-
-    for (auto& cmdBlob : commands)
-    {
-        cmdBlob.BuildArgv();
-        // On one hand, it seems like we should be able to have one
-        // AppCommandline for parsing all of them, and collect the results one
-        // at a time.
-        //
-        // On the other hand, re-using a CLI::App seems to leave state from
-        // previous parsings around, so we could get mysterious behavior where
-        // one command affects the values of the next.
-        //
-        // From https://cliutils.github.io/CLI11/book/chapters/options.html:
-        // > If that option is not given, CLI11 will not touch the initial
-        // > value. This allows you to set up defaults by simply setting your
-        // > value beforehand.
-        //
-        // So we pretty much need the to either manually reset the state each
-        // command, or build new ones.
-        auto result = appArgs.ParseCommand(cmdBlob);
-        if (result != 0)
-        {
-            exit(result);
-        }
-        // DONT
-        // On success, reset the appArgs state, so we can parse again.
-        // Instead just do this every ParseCommand()
-    }
-
-    // If all the args were successfully parsed, we'll have some commands built in appArgs
-
-    std::cout << "\nThanks for using yeet!\n"
-              << std::endl;
-    exit(0);
-    ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
 }

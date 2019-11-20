@@ -6,11 +6,6 @@
 #include "../types/inc/Viewport.hpp"
 #include "../types/inc/utils.hpp"
 
-#include <iostream> // cout, cerr
-// #include <windows.h> //CommandLineToArgvA
-#include <shellapi.h> //CommandLineToArgvA
-#include "../../dep/args/args.hxx"
-
 using namespace winrt::Windows::UI;
 using namespace winrt::Windows::UI::Composition;
 using namespace winrt::Windows::UI::Xaml;
@@ -19,12 +14,12 @@ using namespace winrt::Windows::Foundation::Numerics;
 using namespace ::Microsoft::Console;
 using namespace ::Microsoft::Console::Types;
 
-AppHost::AppHost() noexcept :
+AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
     _app{},
     _logic{ nullptr }, // don't make one, we're going to take a ref on app's
     _window{ nullptr }
 {
-    // _ParseArgs();
+    _ParseArgs(argc, argv);
 
     _logic = _app.Logic(); // get a ref to app's logic
 
@@ -283,4 +278,43 @@ void AppHost::_ToggleFullscreen(const winrt::Windows::Foundation::IInspectable&,
                                 const winrt::TerminalApp::ToggleFullscreenEventArgs&)
 {
     _window->ToggleFullscreen();
+}
+
+void AppHost::_ParseArgs(int argc, wchar_t* argv[])
+{
+    auto commands = AppCommandline::BuildCommands(argc, argv);
+
+    for (auto& cmdBlob : commands)
+    {
+        cmdBlob.BuildArgv();
+        // On one hand, it seems like we should be able to have one
+        // AppCommandline for parsing all of them, and collect the results one
+        // at a time.
+        //
+        // On the other hand, re-using a CLI::App seems to leave state from
+        // previous parsings around, so we could get mysterious behavior where
+        // one command affects the values of the next.
+        //
+        // From https://cliutils.github.io/CLI11/book/chapters/options.html:
+        // > If that option is not given, CLI11 will not touch the initial
+        // > value. This allows you to set up defaults by simply setting your
+        // > value beforehand.
+        //
+        // So we pretty much need the to either manually reset the state each
+        // command, or build new ones.
+        auto result = _appArgs.ParseCommand(cmdBlob);
+        if (result != 0)
+        {
+            exit(result);
+        }
+        // DONT
+        // On success, reset the appArgs state, so we can parse again.
+        // Instead just do this every ParseCommand()
+    }
+
+    // If all the args were successfully parsed, we'll have some commands built in _appArgs
+
+    std::cout << "\nThanks for using yeet!\n"
+              << std::endl;
+    exit(0);
 }

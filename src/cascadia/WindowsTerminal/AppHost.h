@@ -8,10 +8,12 @@
 
 #include "NonClientIslandWindow.h"
 
+#include "AppCommandline.h"
+
 class AppHost
 {
 public:
-    AppHost() noexcept;
+    AppHost(int argc, wchar_t* argv[]) noexcept;
     virtual ~AppHost();
 
     void AppTitleChanged(const winrt::Windows::Foundation::IInspectable& sender, winrt::hstring newTitle);
@@ -25,7 +27,8 @@ private:
     winrt::TerminalApp::App _app;
     winrt::TerminalApp::AppLogic _logic;
 
-    // void _ParseArgs();
+    AppCommandline _appArgs;
+    void _ParseArgs(int argc, wchar_t* argv[]);
 
     void _HandleCreateWindow(const HWND hwnd, RECT proposedRect, winrt::TerminalApp::LaunchMode& launchMode);
     void _UpdateTitleBarContent(const winrt::Windows::Foundation::IInspectable& sender,
