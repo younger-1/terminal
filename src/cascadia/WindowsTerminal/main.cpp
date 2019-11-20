@@ -251,8 +251,26 @@ struct Cmdline
 {
     // int argc;
     std::vector<std::wstring> wargs;
-    // char** argv;
+    char** _argv = nullptr;
     size_t argc() { return wargs.size(); };
+    char** BuildArgv()
+    {
+        if (_argv)
+            return _argv;
+
+        // auto argc = argc();
+        _argv = new char*[argc()];
+        for (int i = 0; i < argc(); i++)
+        {
+            auto lgth = wargs[i].size(); //wcslen(w_argv[i]);
+            _argv[i] = new char[lgth + 1];
+            for (int j = 0; j <= lgth; j++)
+            {
+                _argv[i][j] = char(wargs[i][j]);
+            }
+        }
+        return _argv;
+    }
 };
 
 int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
@@ -267,53 +285,51 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     // while (iterating)
     // {
     // }
+    // {
+    std::vector<Cmdline> commands;
+    commands.emplace_back(Cmdline{});
+    // DebugBreak();
+    for (auto i = 0; i < w_argc; i++)
     {
-        std::vector<Cmdline> commands;
-        commands.emplace_back(Cmdline{});
-        // DebugBreak();
-        for (auto i = 0; i < w_argc; i++)
+        const auto nextFullArg = std::wstring{ w_argv[i] };
+        auto nextDelimiter = nextFullArg.find(cmdSeperator);
+        if (nextDelimiter == std::wstring::npos)
         {
-            const auto nextFullArg = std::wstring{ w_argv[i] };
-            auto nextDelimiter = nextFullArg.find(cmdSeperator);
-            if (nextDelimiter == std::wstring::npos)
-            {
-                commands.rbegin()->wargs.emplace_back(nextFullArg);
-            }
-            else
-            {
-                // auto nextArg = nextFullArg;
-                auto remaining = nextFullArg; //.substr(0, nextDelimiter);
-
-                auto nextArg = remaining.substr(0, nextDelimiter);
-                remaining = remaining.substr(nextDelimiter + 1);
-                commands.rbegin()->wargs.emplace_back(nextArg);
-                // commands.emplace_back(Cmdline{});
-
-                do
-                {
-                    nextDelimiter = remaining.find(cmdSeperator);
-                    commands.emplace_back(Cmdline{});
-                    nextArg = remaining.substr(0, nextDelimiter);
-                    commands.rbegin()->wargs.emplace_back(nextArg);
-                    remaining = remaining.substr(nextDelimiter + 1);
-                    // nextDelimiter = remaining.find(cmdSeperator);
-                } while (nextDelimiter != std::wstring::npos);
-            }
+            commands.rbegin()->wargs.emplace_back(nextFullArg);
         }
-
-        auto j = 0;
-        for (const auto& cmdline : commands)
+        else
         {
-            wprintf(L"Command [%d]\n", j++);
-            auto i = 0;
-            for (const auto& arg : cmdline.wargs)
+            auto remaining = nextFullArg; //.substr(0, nextDelimiter);
+
+            auto nextArg = remaining.substr(0, nextDelimiter);
+            remaining = remaining.substr(nextDelimiter + 1);
+            commands.rbegin()->wargs.emplace_back(nextArg);
+
+            do
             {
-                std::cout << "arg[" << i << "]=\"";
-                wprintf(L"%s\"\n", arg.data());
-                i++;
-            }
+                nextDelimiter = remaining.find(cmdSeperator);
+                commands.emplace_back(Cmdline{});
+                commands.rbegin()->wargs.emplace_back(std::wstring{ L"wt.exe" });
+                nextArg = remaining.substr(0, nextDelimiter);
+                commands.rbegin()->wargs.emplace_back(nextArg);
+                remaining = remaining.substr(nextDelimiter + 1);
+            } while (nextDelimiter != std::wstring::npos);
         }
     }
+
+    auto j = 0;
+    for (const auto& cmdline : commands)
+    {
+        wprintf(L"Command [%d]\n", j++);
+        auto i = 0;
+        for (const auto& arg : cmdline.wargs)
+        {
+            std::cout << "arg[" << i << "]=\"";
+            wprintf(L"%s\"\n", arg.data());
+            i++;
+        }
+    }
+    // }
     // int wargc = 0;
     // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
     // wargv;
@@ -326,17 +342,17 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     // }
 
     // This is horrifying
-    auto argc = w_argc;
-    char** argv = new char*[w_argc];
-    for (int i = 0; i < w_argc; i++)
-    {
-        auto lgth = wcslen(w_argv[i]);
-        argv[i] = new char[lgth + 1];
-        for (int j = 0; j <= lgth; j++)
-        {
-            argv[i][j] = char(w_argv[i][j]);
-        }
-    }
+    // auto argc = w_argc;
+    // char** argv = new char*[w_argc];
+    // for (int i = 0; i < w_argc; i++)
+    // {
+    //     auto lgth = wcslen(w_argv[i]);
+    //     argv[i] = new char[lgth + 1];
+    //     for (int j = 0; j <= lgth; j++)
+    //     {
+    //         argv[i][j] = char(w_argv[i][j]);
+    //     }
+    // }
 
     CLI::App app{ "yeet, a test of the wt commandline" };
     // app.require_subcommand(1);
@@ -385,6 +401,7 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     newTabCommand->add_option("-p,--profile", profileName, "Open with the give profile");
     newTabCommand->add_option("-d,--startingDirectory", startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
     newTabCommand->callback([&]() {
+        std::cout << "######################### new-tab #########################\n";
         if (!profileName.empty())
         {
             std::cout << "profileName: " << profileName << std::endl;
@@ -429,49 +446,62 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         // return !(*helpOption || *helpCommand || *newTabCommand);
     };
 
-    try
+    for (auto& cmdBlob : commands)
     {
-        if (argc == 2 && (std::string("/?") == argv[1] || std::string("-?") == argv[1]))
+        int localArgc = static_cast<int>(cmdBlob.argc());
+        auto localArgv = cmdBlob.BuildArgv();
+
+        std::cout << "######################### starting command #########################\n";
+        for (int i = 0; i < localArgc; i++)
         {
-            throw CLI::CallForHelp();
+            char* arg = localArgv[i];
+            std::cout << "arg[" << i << "]=\"";
+            printf("%s\"\n", arg);
         }
 
-        app.parse(argc, argv);
-        // if (*helpCommand)
-        // // if (*helpOption || *helpCommand)
-        // {
-        //     throw CLI::CallForHelp();
-        // }
-        // else if (noCommandsProvided())
-        if (noCommandsProvided())
+        // DebugBreak();
+        try
         {
-            std::cout << "Didn't find _any_ commands, using newTab to parse\n";
-            newTabCommand->parse(argc, argv);
-        }
-    }
-    catch (const CLI::CallForHelp& e)
-    {
-        exit(app.exit(e));
-    }
-    catch (const CLI::ParseError& e)
-    {
-        if (noCommandsProvided())
-        {
-            std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
-            try
+            if (localArgc == 2 && (std::string("/?") == localArgv[1] || std::string("-?") == localArgv[1]))
             {
-                newTabCommand->parse(argc, argv);
+                throw CLI::CallForHelp();
             }
-            catch (const CLI::ParseError& e)
+            app.clear();
+            app.parse(localArgc, localArgv);
+
+            if (noCommandsProvided())
             {
-                exit(newTabCommand->exit(e));
+                std::cout << "Didn't find _any_ commands, using newTab to parse\n";
+                newTabCommand->clear();
+                newTabCommand->parse(localArgc, localArgv);
             }
         }
-        else
+        catch (const CLI::CallForHelp& e)
         {
             exit(app.exit(e));
         }
+        catch (const CLI::ParseError& e)
+        {
+            if (noCommandsProvided())
+            {
+                std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
+                try
+                {
+                    newTabCommand->clear();
+                    newTabCommand->parse(localArgc, localArgv);
+                }
+                catch (const CLI::ParseError& e)
+                {
+                    exit(newTabCommand->exit(e));
+                }
+            }
+            else
+            {
+                exit(app.exit(e));
+            }
+        }
     }
+
     std::cout << "\nThanks for using yeet!\n"
               << std::endl;
     exit(0);
