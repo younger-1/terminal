@@ -8,7 +8,12 @@
 #include <iostream> // cout, cerr
 // #include <windows.h> //CommandLineToArgvA
 #include <shellapi.h> //CommandLineToArgvA
-#include "../../dep/args/args.hxx"
+// #include "../../dep/args/args.hxx"
+
+// #pragma warning(push)
+// #pragma warning(disable : 4541)
+#include "../../dep/CLI11/CLI11.hpp"
+// #pragma warning(pop)
 
 using namespace winrt;
 using namespace winrt::Windows::UI;
@@ -101,101 +106,102 @@ static void EnsureNativeArchitecture()
     }
 }
 
-// args::Group arguments("arguments");
-// args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
-// args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
-// args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
+// // args::Group arguments("arguments");
+// // args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
+// // args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
+// // args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
 
-void _ParseArgs(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
-{
-    w_envp;
-    // auto originalCommandline = GetCommandLineW();
-    // int wargc = 0;
-    // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
-    // wargv;
-    // wargc;
+// void _ParseArgs(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
+// {
+//     w_envp;
+//     // auto originalCommandline = GetCommandLineW();
+//     // int wargc = 0;
+//     // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
+//     // wargv;
+//     // wargc;
 
-    // char* argv = new char[argc];
-    // for (int i = 0; i < argc; i++)
-    // {
+//     // char* argv = new char[argc];
+//     // for (int i = 0; i < argc; i++)
+//     // {
 
-    // }
+//     // }
 
-    // This is horrifying
-    char** argv = new char*[w_argc];
-    for (int i = 0; i < w_argc; i++)
-    {
-        auto lgth = wcslen(w_argv[i]);
-        argv[i] = new char[lgth + 1];
-        for (int j = 0; j <= lgth; j++)
-        {
-            argv[i][j] = char(w_argv[i][j]);
-        }
-    }
+//     // This is horrifying
+//     char** argv = new char*[w_argc];
+//     for (int i = 0; i < w_argc; i++)
+//     {
+//         auto lgth = wcslen(w_argv[i]);
+//         argv[i] = new char[lgth + 1];
+//         for (int j = 0; j <= lgth; j++)
+//         {
+//             argv[i][j] = char(w_argv[i][j]);
+//         }
+//     }
 
-    auto addParser = [&](args::Subparser& parser) {
-        parser.Parse();
-        std::cout << "Add";
-        // for (auto&& path : pathsList)
-        // {
-        //     std::cout << ' ' << path;
-        // }
-        std::cout << std::endl;
-    };
-    auto commitParser = [&](args::Subparser& parser) {
-        args::ValueFlag<std::string> message(parser, "MESSAGE", "commit message", { 'm' });
-        parser.Parse();
-        std::cout << "Commit";
-        // for (auto&& path : pathsList)
-        // {
-        //     std::cout << ' ' << path;
-        // }
-        std::cout << std::endl;
-        if (message)
-        {
-            std::cout << "message: " << args::get(message) << std::endl;
-        }
-    };
+//     auto addParser = [&](args::Subparser& parser) {
+//         parser.Parse();
+//         std::cout << "Add";
+//         // for (auto&& path : pathsList)
+//         // {
+//         //     std::cout << ' ' << path;
+//         // }
+//         std::cout << std::endl;
+//     };
+//     auto commitParser = [&](args::Subparser& parser) {
+//         args::ValueFlag<std::string> message(parser, "MESSAGE", "commit message", { 'm' });
+//         parser.Parse();
+//         std::cout << "Commit";
+//         // for (auto&& path : pathsList)
+//         // {
+//         //     std::cout << ' ' << path;
+//         // }
+//         std::cout << std::endl;
+//         if (message)
+//         {
+//             std::cout << "message: " << args::get(message) << std::endl;
+//         }
+//     };
 
-    args::ArgumentParser rootParser("git-like parser");
+//     args::ArgumentParser rootParser("git-like parser");
 
-    args::Group commands(rootParser, "commands");
-    args::Command add(commands, "add", "add file contents to the index", addParser);
-    args::Command commit(commands, "commit", "record changes to the repository", commitParser);
+//     args::Group commands(rootParser, "commands");
+//     args::Command add(commands, "add", "add file contents to the index", addParser);
+//     args::Command commit(commands, "commit", "record changes to the repository", commitParser);
 
-    args::Group arguments("arguments");
-    args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
-    args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
-    args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
+//     args::Group arguments("arguments");
+//     args::ValueFlag<std::string> gitdir(arguments, "path", "", { "git-dir" });
+//     args::HelpFlag h(arguments, "help", "help", { 'h', "help" });
+//     args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
 
-    args::GlobalOptions globals(rootParser, arguments);
+//     args::GlobalOptions globals(rootParser, arguments);
 
-    // auto argv = __argv;
-    // auto argc = __argc;
-    if (w_argc == 0)
-    {
-        std::cout << rootParser;
-        exit(0);
-    }
+//     // auto argv = __argv;
+//     // auto argc = __argc;
+//     if (w_argc == 0)
+//     {
+//         std::cout << rootParser;
+//         exit(0);
+//     }
 
-    try
-    {
-        rootParser.ParseCLI(w_argc, argv);
-        // rootParser.ParseCLI(__argc, __argv);
-    }
-    catch (args::Help)
-    {
-        std::cout << rootParser;
-    }
-    catch (args::Error& e)
-    {
-        std::cerr << e.what() << std::endl
-                  << rootParser;
-        // return 1;
-    }
-    // return 0;
-    exit(0);
-}
+//     try
+//     {
+//         rootParser.ParseCLI(w_argc, argv);
+//         // rootParser.ParseCLI(__argc, __argv);
+//     }
+//     catch (args::Help)
+//     {
+//         std::cout << rootParser;
+//     }
+//     catch (args::Error& e)
+//     {
+//         std::cerr << e.what() << std::endl
+//                   << rootParser;
+//         // return 1;
+//     }
+//     // return 0;
+//     exit(0);
+// }
+int _ParseArgs2(int argc, wchar_t* argv[], wchar_t* envp[]);
 
 // int __stdcall wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
@@ -208,7 +214,7 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
         TraceLoggingKeyword(MICROSOFT_KEYWORD_MEASURES),
         TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
 
-    _ParseArgs(argc, argv, envp);
+    _ParseArgs2(argc, argv, envp);
 
     // Block the user from starting if they launched the incorrect architecture version of the project.
     // This should only be applicable to developer versions. The package installation process
@@ -249,4 +255,86 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
         DispatchMessage(&message);
     }
     return 0;
+}
+
+int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
+{
+    w_envp;
+    // auto originalCommandline = GetCommandLineW();
+    // int wargc = 0;
+    // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
+    // wargv;
+    // wargc;
+
+    // char* argv = new char[argc];
+    // for (int i = 0; i < argc; i++)
+    // {
+
+    // }
+
+    // This is horrifying
+    auto argc = w_argc;
+    char** argv = new char*[w_argc];
+    for (int i = 0; i < w_argc; i++)
+    {
+        auto lgth = wcslen(w_argv[i]);
+        argv[i] = new char[lgth + 1];
+        for (int j = 0; j <= lgth; j++)
+        {
+            argv[i][j] = char(w_argv[i][j]);
+        }
+    }
+
+    CLI::App app{ "Geet, a command line git lookalike that does nothing" };
+    // app.require_subcommand(1);
+    ////////////////////////////////////////////////////////////////////////////
+    auto add = app.add_subcommand("add", "Add file(s)");
+    bool add_update;
+    add->add_flag("-u,--update", add_update, "Add updated files only");
+    std::vector<std::string> add_files;
+    add->add_option("files", add_files, "Files to add");
+    add->callback([&]() {
+        std::cout << "Adding:";
+        if (add_files.empty())
+        {
+            if (add_update)
+                std::cout << " all updated files";
+            else
+                std::cout << " all files";
+        }
+        else
+        {
+            for (auto file : add_files)
+                std::cout << " " << file;
+        }
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    auto commit = app.add_subcommand("commit", "Commit files");
+
+    std::string commit_message;
+    commit->add_option("-m,--message", commit_message, "A message")->required();
+
+    commit->callback([&]() { std::cout << "Commit message: " << commit_message; });
+    ////////////////////////////////////////////////////////////////////////////
+    // CLI11_PARSE(app, argc, argv);
+    try
+    {
+        app.parse(argc, argv);
+    }
+    catch (const CLI::CallForHelp& e)
+    {
+        exit(app.exit(e));
+        // return app.exit(e);
+    }
+    catch (const CLI::ParseError& e)
+    {
+        exit(app.exit(e));
+        // return app.exit(e);
+    }
+    std::cout << "\nThanks for using geet!\n"
+              << std::endl;
+    exit(0);
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 }

@@ -23,10 +23,21 @@
 
   <ItemDefinitionGroup>
     <Link>
-      <!-- <ProgramDatabaseFile>$(OutDir)$(TargetName)FullPDB.pdb</ProgramDatabaseFile> -->
+      <!-- Manually make sure we're a console application, so commandline args
+      work fine for us. If we're left as SUBSYSTEM=Windows, then calling wt from
+      the commandline will have the shell return to the prompt before we start
+      printing console output, which is _not_ what you want. -->
       <SubSystem>Console</SubSystem>
-      <!-- <SetChecksum>true</SetChecksum> -->
     </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- For CLI11: It uses dynamic_cast to cast types around, which depends
+      on being compiled with RTTI (/GR). I don't know what kind of hit this has
+      on us. -->
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    </ClCompile>
   </ItemDefinitionGroup>
 
   <ItemDefinitionGroup>
