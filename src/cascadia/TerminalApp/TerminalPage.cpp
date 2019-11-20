@@ -13,6 +13,8 @@
 #include "AzureCloudShellGenerator.h" // For AzureConnectionType
 #include "TabRowControl.h"
 
+#include "NewTabCommand.g.cpp" // TODO move me
+
 using namespace winrt;
 using namespace winrt::Windows::UI::Xaml;
 using namespace winrt::Windows::UI::Core;
@@ -1364,6 +1366,17 @@ namespace winrt::TerminalApp::implementation
         _isFullscreen = !_isFullscreen;
 
         _UpdateTabView();
+    }
+
+    void TerminalPage::DoStartupCommand(const TerminalApp::IStartupCommand& command)
+    // void TerminalPage::DoStartupCommands(array_view<TerminalApp::IStartupCommand> commands)
+    {
+        // for (cmd : commands)
+        // {
+        //     _commands.push_back(cmd);
+        // }
+        DebugBreak();
+        command;
     }
 
     // -------------------------------- WinRT Events ---------------------------------

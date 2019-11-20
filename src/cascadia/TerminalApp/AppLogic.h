@@ -30,6 +30,9 @@ namespace winrt::TerminalApp::implementation
         void Create();
         void LoadSettings();
 
+        void SetStartupCommand(const TerminalApp::IStartupCommand& commands);
+        // void SetStartupCommands(array_view<TerminalApp::IStartupCommand> commands);
+
         Windows::Foundation::Point GetLaunchDimensions(uint32_t dpi);
         winrt::Windows::Foundation::Point GetLaunchInitialPositions(int32_t defaultInitialX, int32_t defaultInitialY);
         winrt::Windows::UI::Xaml::ElementTheme GetRequestedTheme();
@@ -66,6 +69,9 @@ namespace winrt::TerminalApp::implementation
         std::shared_mutex _dialogLock;
 
         std::atomic<bool> _settingsReloadQueued{ false };
+
+        // std::vector<TerminalApp::IStartupCommand const> _commands;
+        TerminalApp::IStartupCommand _command;
 
         fire_and_forget _ShowDialog(const winrt::Windows::Foundation::IInspectable& sender, winrt::Windows::UI::Xaml::Controls::ContentDialog dialog);
         void _ShowLoadErrorsDialog(const winrt::hstring& titleKey, const winrt::hstring& contentKey, HRESULT settingsLoadedResult);

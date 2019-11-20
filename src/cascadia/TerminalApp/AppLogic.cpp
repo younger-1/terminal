@@ -161,6 +161,16 @@ namespace winrt::TerminalApp::implementation
             TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
     }
 
+    // void AppLogic::SetStartupCommands(array_view<TerminalApp::IStartupCommand> commands)
+    void AppLogic::SetStartupCommand(const TerminalApp::IStartupCommand& command)
+    {
+        // for (auto cmd : commands)
+        // {
+        //     _commands.push_back(cmd);
+        // }
+        _command = command;
+    }
+
     // Method Description:
     // - Show a ContentDialog with buttons to take further action. Uses the
     //   FrameworkElements provided as the title and content of this dialog, and
@@ -298,6 +308,9 @@ namespace winrt::TerminalApp::implementation
     void AppLogic::_OnLoaded(const IInspectable& /*sender*/,
                              const RoutedEventArgs& /*eventArgs*/)
     {
+        // _root->DoStartupCommands({ _commands });
+        _root->DoStartupCommand(_command);
+
         if (FAILED(_settingsLoadedResult))
         {
             const winrt::hstring titleKey = USES_RESOURCE(L"InitialJsonParseErrorTitle");
