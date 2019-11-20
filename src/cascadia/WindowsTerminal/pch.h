@@ -63,3 +63,13 @@ Abstract:
 TRACELOGGING_DECLARE_PROVIDER(g_hWindowsTerminalProvider);
 #include <telemetry\ProjectTelemetry.h>
 #include <TraceLoggingActivity.h>
+
+#include <iostream> // cout, cerr
+// #include <windows.h> //CommandLineToArgvA
+#include <shellapi.h> //CommandLineToArgvA
+// #include "../../dep/args/args.hxx"
+
+// #pragma warning(push)
+// #pragma warning(disable : 4541)
+#include "../../dep/CLI11/CLI11.hpp"
+// #pragma warning(pop)

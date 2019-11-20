@@ -5,16 +5,6 @@
 #include "AppHost.h"
 #include "resource.h"
 
-#include <iostream> // cout, cerr
-// #include <windows.h> //CommandLineToArgvA
-#include <shellapi.h> //CommandLineToArgvA
-// #include "../../dep/args/args.hxx"
-
-// #pragma warning(push)
-// #pragma warning(disable : 4541)
-#include "../../dep/CLI11/CLI11.hpp"
-// #pragma warning(pop)
-
 using namespace winrt;
 using namespace winrt::Windows::UI;
 using namespace winrt::Windows::UI::Composition;
@@ -257,10 +247,73 @@ int __stdcall wmain(int argc, wchar_t* argv[], wchar_t* envp[])
     return 0;
 }
 
+struct Cmdline
+{
+    // int argc;
+    std::vector<std::wstring> wargs;
+    // char** argv;
+    size_t argc() { return wargs.size(); };
+};
+
 int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
 {
     w_envp;
-    // auto originalCommandline = GetCommandLineW();
+
+    auto originalCommandline = GetCommandLineA();
+    std::cout << "originalCommandline=\"" << originalCommandline << "\"\n";
+
+    std::wstring cmdSeperator = L";";
+    // bool iterating = true;
+    // while (iterating)
+    // {
+    // }
+    {
+        std::vector<Cmdline> commands;
+        commands.emplace_back(Cmdline{});
+        // DebugBreak();
+        for (auto i = 0; i < w_argc; i++)
+        {
+            const auto nextFullArg = std::wstring{ w_argv[i] };
+            auto nextDelimiter = nextFullArg.find(cmdSeperator);
+            if (nextDelimiter == std::wstring::npos)
+            {
+                commands.rbegin()->wargs.emplace_back(nextFullArg);
+            }
+            else
+            {
+                // auto nextArg = nextFullArg;
+                auto remaining = nextFullArg; //.substr(0, nextDelimiter);
+
+                auto nextArg = remaining.substr(0, nextDelimiter);
+                remaining = remaining.substr(nextDelimiter + 1);
+                commands.rbegin()->wargs.emplace_back(nextArg);
+                // commands.emplace_back(Cmdline{});
+
+                do
+                {
+                    nextDelimiter = remaining.find(cmdSeperator);
+                    commands.emplace_back(Cmdline{});
+                    nextArg = remaining.substr(0, nextDelimiter);
+                    commands.rbegin()->wargs.emplace_back(nextArg);
+                    remaining = remaining.substr(nextDelimiter + 1);
+                    // nextDelimiter = remaining.find(cmdSeperator);
+                } while (nextDelimiter != std::wstring::npos);
+            }
+        }
+
+        auto j = 0;
+        for (const auto& cmdline : commands)
+        {
+            wprintf(L"Command [%d]\n", j++);
+            auto i = 0;
+            for (const auto& arg : cmdline.wargs)
+            {
+                std::cout << "arg[" << i << "]=\"";
+                wprintf(L"%s\"\n", arg.data());
+                i++;
+            }
+        }
+    }
     // int wargc = 0;
     // wchar_t** wargv = CommandLineToArgvW(originalCommandline, &wargc);
     // wargv;
@@ -285,7 +338,7 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         }
     }
 
-    CLI::App app{ "Geet, a command line git lookalike that does nothing" };
+    CLI::App app{ "yeet, a test of the wt commandline" };
     // app.require_subcommand(1);
     ////////////////////////////////////////////////////////////////////////////
     // auto add = app.add_subcommand("add", "Add file(s)");
@@ -419,7 +472,7 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
             exit(app.exit(e));
         }
     }
-    std::cout << "\nThanks for using geet!\n"
+    std::cout << "\nThanks for using yeet!\n"
               << std::endl;
     exit(0);
     ////////////////////////////////////////////////////////////////////////////
