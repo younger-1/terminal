@@ -317,7 +317,7 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
 
     ////////////////////////////////////////////////////////////////////////////
     // Remove help flag because it shortcuts all processing
-    app.set_help_flag();
+    // app.set_help_flag();
     // auto helpOption = app.add_flag("-h,-?,--help", "Print the help message and exit");
     // Can't add a /? here. That's unfortunate.
     // auto windowsHelp = app.add_flag("/?", "Print the help message and exit");
@@ -363,6 +363,11 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
 
     try
     {
+        if (argc == 2 && (std::string("/?") == argv[1] || std::string("-?") == argv[1]))
+        {
+            throw CLI::CallForHelp();
+        }
+
         app.parse(argc, argv);
         // if (*helpCommand)
         // // if (*helpOption || *helpCommand)
