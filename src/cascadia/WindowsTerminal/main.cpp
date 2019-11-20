@@ -288,48 +288,101 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     CLI::App app{ "Geet, a command line git lookalike that does nothing" };
     // app.require_subcommand(1);
     ////////////////////////////////////////////////////////////////////////////
-    auto add = app.add_subcommand("add", "Add file(s)");
-    bool add_update;
-    add->add_flag("-u,--update", add_update, "Add updated files only");
-    std::vector<std::string> add_files;
-    add->add_option("files", add_files, "Files to add");
-    add->callback([&]() {
-        std::cout << "Adding:";
-        if (add_files.empty())
+    // auto add = app.add_subcommand("add", "Add file(s)");
+    // bool add_update;
+    // add->add_flag("-u,--update", add_update, "Add updated files only");
+    // std::vector<std::string> add_files;
+    // add->add_option("files", add_files, "Files to add");
+    // add->callback([&]() {
+    //     std::cout << "Adding:";
+    //     if (add_files.empty())
+    //     {
+    //         if (add_update)
+    //             std::cout << " all updated files";
+    //         else
+    //             std::cout << " all files";
+    //     }
+    //     else
+    //     {
+    //         for (auto file : add_files)
+    //             std::cout << " " << file;
+    //     }
+    // });
+    ////////////////////////////////////////////////////////////////////////////
+    // auto commit = app.add_subcommand("commit", "Commit files");
+    // std::string commit_message;
+    // commit->add_option("-m,--message", commit_message, "A message")->required();
+    // commit->callback([&]() { std::cout << "Commit message: " << commit_message; });
+    ////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Remove help flag because it shortcuts all processing
+    // app.set_help_flag();
+    // auto helpOption = app.add_flag("-h,-?,--help", "Print the help message and exit");
+    // Can't add a /? here. That's unfortunate.
+    // auto windowsHelp = app.add_flag("/?", "Print the help message and exit");
+    ////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////
+    auto newTabCommand = app.add_subcommand("new-tab", "Create a new tab");
+    std::string profileName;
+    std::string startingDirectory;
+    newTabCommand->add_option("-p,--profile", profileName, "Open with the give profile");
+    newTabCommand->add_option("-d,--startingDirectory", startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
+    newTabCommand->callback([&]() {
+        if (!profileName.empty())
         {
-            if (add_update)
-                std::cout << " all updated files";
-            else
-                std::cout << " all files";
+            std::cout << "profileName: " << profileName << std::endl;
         }
         else
         {
-            for (auto file : add_files)
-                std::cout << " " << file;
+            std::cout << "Use the default profile" << std::endl;
+        }
+        if (!startingDirectory.empty())
+        {
+            std::cout << "startingDirectory: " << startingDirectory << std::endl;
+        }
+        else
+        {
+            std::cout << "Use the default startingDirectory" << std::endl;
         }
     });
     ////////////////////////////////////////////////////////////////////////////
-    auto commit = app.add_subcommand("commit", "Commit files");
-
-    std::string commit_message;
-    commit->add_option("-m,--message", commit_message, "A message")->required();
-
-    commit->callback([&]() { std::cout << "Commit message: " << commit_message; });
     ////////////////////////////////////////////////////////////////////////////
-    // CLI11_PARSE(app, argc, argv);
+    auto helpCommand = app.add_subcommand("help", "Print the help message and exit");
+    ////////////////////////////////////////////////////////////////////////////
+
+    auto noCommandsProvided = [&]() -> bool {
+        return !(*helpCommand || *newTabCommand);
+        // return !(*helpOption || *helpCommand || *newTabCommand);
+    };
+
     try
     {
         app.parse(argc, argv);
+        if (*helpCommand)
+        // if (*helpOption || *helpCommand)
+        {
+            throw CLI::CallForHelp();
+        }
+        else if (noCommandsProvided())
+        {
+            std::cout << "Didn't find _any_ commands, using newTab to parse\n";
+            newTabCommand->parse(argc, argv);
+        }
     }
     catch (const CLI::CallForHelp& e)
     {
         exit(app.exit(e));
-        // return app.exit(e);
     }
     catch (const CLI::ParseError& e)
     {
+        if (noCommandsProvided())
+        {
+            std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
+            newTabCommand->parse(argc, argv);
+        }
         exit(app.exit(e));
-        // return app.exit(e);
     }
     std::cout << "\nThanks for using geet!\n"
               << std::endl;
