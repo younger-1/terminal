@@ -287,6 +287,7 @@ public:
 private:
     void _BuildParser();
     bool _NoCommandsProvided();
+    void _ResetStateToDefault();
 
     CLI::App _app{ "yeet, a test of the wt commandline" };
     CLI::App* _newTabCommand;
@@ -295,6 +296,7 @@ private:
     std::string _profileName;
     std::string _startingDirectory;
     std::vector<std::string> _commandline;
+    // Are you adding more args here? Make sure to reset them in _ResetStateToDefault
 };
 
 std::vector<Cmdline> BuildCommands(int w_argc, wchar_t* w_argv[])
@@ -335,6 +337,14 @@ std::vector<Cmdline> BuildCommands(int w_argc, wchar_t* w_argv[])
 AppCommandline::AppCommandline()
 {
     _BuildParser();
+    _ResetStateToDefault();
+}
+
+void AppCommandline::_ResetStateToDefault()
+{
+    _profileName = "";
+    _startingDirectory = "";
+    _commandline.clear();
 }
 
 int AppCommandline::ParseCommand(const Cmdline& command)
@@ -349,6 +359,7 @@ int AppCommandline::ParseCommand(const Cmdline& command)
     //     std::cout << "arg[" << i << "]=\"";
     //     printf("%s\"\n", arg);
     // }
+    _ResetStateToDefault();
 
     try
     {
@@ -456,12 +467,32 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     for (auto& cmdBlob : commands)
     {
         cmdBlob.BuildArgv();
+        // On one hand, it seems like we should be able to have one
+        // AppCommandline for parsing all of them, and collect the results one
+        // at a time.
+        //
+        // On the other hand, re-using a CLI::App seems to leave state from
+        // previous parsings around, so we could get mysterious behavior where
+        // one command affects the values of the next.
+        //
+        // From https://cliutils.github.io/CLI11/book/chapters/options.html:
+        // > If that option is not given, CLI11 will not touch the initial
+        // > value. This allows you to set up defaults by simply setting your
+        // > value beforehand.
+        //
+        // So we pretty much need the to either manually reset the state each
+        // command, or build new ones.
         auto result = appArgs.ParseCommand(cmdBlob);
         if (result != 0)
         {
             exit(result);
         }
+        // DONT
+        // On success, reset the appArgs state, so we can parse again.
+        // Instead just do this every ParseCommand()
     }
+
+    // If all the args were successfully parsed, we'll have some commands built in appArgs
 
     std::cout << "\nThanks for using yeet!\n"
               << std::endl;
