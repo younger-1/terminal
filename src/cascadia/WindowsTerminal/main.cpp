@@ -317,7 +317,7 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
 
     ////////////////////////////////////////////////////////////////////////////
     // Remove help flag because it shortcuts all processing
-    // app.set_help_flag();
+    app.set_help_flag();
     // auto helpOption = app.add_flag("-h,-?,--help", "Print the help message and exit");
     // Can't add a /? here. That's unfortunate.
     // auto windowsHelp = app.add_flag("/?", "Print the help message and exit");
@@ -349,23 +349,28 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
     });
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    auto helpCommand = app.add_subcommand("help", "Print the help message and exit");
+    // auto helpCommand = app.add_subcommand("help", "Print the help message and exit");
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    auto listProfilesCommand = app.add_subcommand("list-profiles", "List all the available profiles");
     ////////////////////////////////////////////////////////////////////////////
 
     auto noCommandsProvided = [&]() -> bool {
-        return !(*helpCommand || *newTabCommand);
+        return !(*listProfilesCommand || *newTabCommand);
+        // return !(*helpCommand || *newTabCommand);
         // return !(*helpOption || *helpCommand || *newTabCommand);
     };
 
     try
     {
         app.parse(argc, argv);
-        if (*helpCommand)
-        // if (*helpOption || *helpCommand)
-        {
-            throw CLI::CallForHelp();
-        }
-        else if (noCommandsProvided())
+        // if (*helpCommand)
+        // // if (*helpOption || *helpCommand)
+        // {
+        //     throw CLI::CallForHelp();
+        // }
+        // else if (noCommandsProvided())
+        if (noCommandsProvided())
         {
             std::cout << "Didn't find _any_ commands, using newTab to parse\n";
             newTabCommand->parse(argc, argv);
@@ -380,9 +385,19 @@ int _ParseArgs2(int w_argc, wchar_t* w_argv[], wchar_t* w_envp[])
         if (noCommandsProvided())
         {
             std::cout << "EXCEPTIONALLY Didn't find _any_ commands, using newTab to parse\n";
-            newTabCommand->parse(argc, argv);
+            try
+            {
+                newTabCommand->parse(argc, argv);
+            }
+            catch (const CLI::ParseError& e)
+            {
+                exit(newTabCommand->exit(e));
+            }
         }
-        exit(app.exit(e));
+        else
+        {
+            exit(app.exit(e));
+        }
     }
     std::cout << "\nThanks for using geet!\n"
               << std::endl;
