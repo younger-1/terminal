@@ -32,6 +32,7 @@ namespace Microsoft.Terminal.TerminalControl
         event ConnectionClosedEventArgs ConnectionClosed;
         event Windows.Foundation.TypedEventHandler<TermControl, CopyToClipboardEventArgs> CopyToClipboard;
         event Windows.Foundation.TypedEventHandler<TermControl, PasteFromClipboardEventArgs> PasteFromClipboard;
+        event Windows.Foundation.TypedEventHandler<TermControl, Windows.UI.Xaml.RoutedEventArgs> Initialized;
 
         String Title { get; };
 

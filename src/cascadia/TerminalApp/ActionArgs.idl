@@ -29,11 +29,13 @@ namespace TerminalApp
 
     [default_interface] runtimeclass CopyTextArgs : IActionArgs
     {
+        CopyTextArgs();
         Boolean TrimWhitespace { get; };
     };
 
     [default_interface] runtimeclass NewTabArgs : IActionArgs
     {
+        NewTabArgs();
         // ProfileIndex can be null (for "use the default"), so this needs to be
         // a IReference, so it's nullable
         Windows.Foundation.IReference<Int32> ProfileIndex { get; };
@@ -41,21 +43,25 @@ namespace TerminalApp
 
     [default_interface] runtimeclass SwitchToTabArgs : IActionArgs
     {
+        SwitchToTabArgs();
         Int32 TabIndex { get; };
     };
 
     [default_interface] runtimeclass ResizePaneArgs : IActionArgs
     {
+        ResizePaneArgs();
         Direction Direction { get; };
     };
 
     [default_interface] runtimeclass MoveFocusArgs : IActionArgs
     {
+        MoveFocusArgs();
         Direction Direction { get; };
     };
 
     [default_interface] runtimeclass AdjustFontSizeArgs : IActionArgs
     {
+        AdjustFontSizeArgs();
         Int32 Delta { get; };
     };
 

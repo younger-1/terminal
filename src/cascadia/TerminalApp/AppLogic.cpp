@@ -163,10 +163,7 @@ namespace winrt::TerminalApp::implementation
 
     void AppLogic::SetStartupActions(array_view<const TerminalApp::ActionAndArgs> actions)
     {
-        for (const auto& a : actions)
-        {
-            _actions.push_back(a);
-        }
+        _root->SetStartupActions(actions);
     }
 
     // Method Description:
@@ -306,11 +303,6 @@ namespace winrt::TerminalApp::implementation
     void AppLogic::_OnLoaded(const IInspectable& /*sender*/,
                              const RoutedEventArgs& /*eventArgs*/)
     {
-        if (_actions.size() > 0)
-        {
-            _root->DoStartupActions({ _actions });
-        }
-
         if (FAILED(_settingsLoadedResult))
         {
             const winrt::hstring titleKey = USES_RESOURCE(L"InitialJsonParseErrorTitle");

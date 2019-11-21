@@ -107,9 +107,40 @@ namespace winrt::TerminalApp::implementation
         _tabView.TabItemsChanged({ this, &TerminalPage::_OnTabItemsChanged });
 
         _CreateNewTabFlyout();
-        _OpenNewTab(std::nullopt);
 
         _tabContent.SizeChanged({ this, &TerminalPage::_OnContentSizeChanged });
+
+        // Actually start the terminal.
+        if (_startupActions.size() == 0)
+        {
+            _OpenNewTab(std::nullopt);
+        }
+        else
+        {
+            _ProcessNextStartupAction();
+            // // DebugBreak();
+            // Dispatcher().RunAsync(CoreDispatcherPriority::Low, [this]() {
+            //     for (const auto& action : _startupActions)
+            //     {
+            //         _actionDispatch.DoAction(action);
+            //     }
+            // });
+        }
+    }
+
+    void TerminalPage::_ProcessNextStartupAction()
+    {
+        if (_startupActions.size() == 0)
+        {
+            return;
+        }
+
+        auto nextAction = _startupActions.front();
+        _startupActions.pop_front();
+
+        Dispatcher().RunAsync(CoreDispatcherPriority::Low, [this, nextAction]() {
+            _actionDispatch.DoAction(nextAction);
+        });
     }
 
     // Method Description:
@@ -744,6 +775,10 @@ namespace winrt::TerminalApp::implementation
 
         // Add an event handler when the terminal wants to paste data from the Clipboard.
         term.PasteFromClipboard({ this, &TerminalPage::_PasteFromClipboardHandler });
+
+        term.Initialized([this](auto&&, auto&&) {
+            _ProcessNextStartupAction();
+        });
     }
 
     // Method Description:
@@ -1378,20 +1413,13 @@ namespace winrt::TerminalApp::implementation
         _UpdateTabView();
     }
 
-    void TerminalPage::DoStartupActions(array_view<const TerminalApp::ActionAndArgs> actions)
+    void TerminalPage::SetStartupActions(array_view<const TerminalApp::ActionAndArgs> actions)
     {
-        DebugBreak();
-        for (const auto& cmd : actions)
+        for (const auto& a : actions)
         {
-            cmd;
+            _startupActions.push_back(a);
         }
     }
-
-    // void TerminalPage::DoStartupCommand(const TerminalApp::IStartupCommand& command)
-    // {
-    //     DebugBreak();
-    //     command;
-    // }
 
     // -------------------------------- WinRT Events ---------------------------------
     // Winrt events need a method for adding a callback to the event and removing the callback.

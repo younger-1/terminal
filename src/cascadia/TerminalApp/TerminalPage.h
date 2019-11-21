@@ -38,7 +38,7 @@ namespace winrt::TerminalApp::implementation
 
         void CloseWindow();
 
-        void DoStartupActions(array_view<const TerminalApp::ActionAndArgs> actions);
+        void SetStartupActions(array_view<const TerminalApp::ActionAndArgs> actions);
 
         // -------------------------------- WinRT Events ---------------------------------
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(TitleChanged, _titleChangeHandlers, winrt::Windows::Foundation::IInspectable, winrt::hstring);
@@ -70,6 +70,9 @@ namespace winrt::TerminalApp::implementation
         std::optional<int> _rearrangeTo;
 
         ShortcutActionDispatch _actionDispatch{};
+
+        std::deque<TerminalApp::ActionAndArgs> _startupActions;
+        void _ProcessNextStartupAction();
 
         void _ShowAboutDialog();
         void _ShowCloseWarningDialog();

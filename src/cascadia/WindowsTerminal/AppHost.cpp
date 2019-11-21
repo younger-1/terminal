@@ -40,7 +40,9 @@ AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
         ActionAndArgs one, two, three;
         one.Action(ShortcutAction::NewTab);
         two.Action(ShortcutAction::SplitVertical);
-        three.Action(ShortcutAction::MoveFocus);
+        three.Action(ShortcutAction::SplitHorizontal);
+        one.Args(NewTabArgs{});
+        // three.Action(ShortcutAction::MoveFocus);
         actions.push_back(one);
         actions.push_back(two);
         actions.push_back(three);
@@ -109,7 +111,7 @@ void AppHost::Initialize()
     _logic.TitleChanged({ this, &AppHost::AppTitleChanged });
     _logic.LastTabClosed({ this, &AppHost::LastTabClosed });
 
-    _window->UpdateTitle(_logic.Title());
+    // _window->UpdateTitle(_logic.Title());
 
     // Set up the content of the application. If the app has a custom titlebar,
     // set that content as well.
