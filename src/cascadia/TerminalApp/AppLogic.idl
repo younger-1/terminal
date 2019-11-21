@@ -2,6 +2,8 @@
 // Licensed under the MIT license.
 
 import "../TerminalPage.idl";
+// TODO: AKB is only imported for ActionAndArgs. That should be in ActionDispatch
+import "../AppKeyBindings.idl";
 
 namespace TerminalApp
 {
@@ -21,8 +23,7 @@ namespace TerminalApp
         // registered?" when it definitely is.
         void Create();
 
-        void SetStartupCommands(IStartupCommand[] commands);
-        void SetStartupCommand(IStartupCommand command);
+        void SetStartupActions(ActionAndArgs[] commands);
 
         void LoadSettings();
         Windows.UI.Xaml.UIElement GetRoot();

@@ -13,6 +13,7 @@ using namespace winrt::Windows::UI::Xaml::Hosting;
 using namespace winrt::Windows::Foundation::Numerics;
 using namespace ::Microsoft::Console;
 using namespace ::Microsoft::Console::Types;
+using namespace winrt::TerminalApp;
 
 AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
     _app{},
@@ -34,12 +35,21 @@ AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
         _window = std::make_unique<IslandWindow>();
     }
 
-    std::vector<winrt::TerminalApp::IStartupCommand> commands;
-    commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
-    commands.emplace_back(winrt::TerminalApp::NewPaneCommand{});
-    commands.emplace_back(winrt::TerminalApp::FocusTabCommand{});
-    // _logic.SetStartupCommand(winrt::TerminalApp::NewTabCommand{});
-    _logic.SetStartupCommands(commands);
+    {
+        std::vector<winrt::TerminalApp::ActionAndArgs> actions;
+        ActionAndArgs one, two, three;
+        one.Action(ShortcutAction::NewTab);
+        two.Action(ShortcutAction::SplitVertical);
+        three.Action(ShortcutAction::MoveFocus);
+        actions.push_back(one);
+        actions.push_back(two);
+        actions.push_back(three);
+        // commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
+        // commands.emplace_back(winrt::TerminalApp::NewPaneCommand{});
+        // commands.emplace_back(winrt::TerminalApp::MoveFocus{});
+        // _logic.SetStartupCommand(winrt::TerminalApp::NewTabCommand{});
+        _logic.SetStartupActions(actions);
+    }
 
     // Tell the window to callback to us when it's about to handle a WM_CREATE
     auto pfn = std::bind(&AppHost::_HandleCreateWindow,

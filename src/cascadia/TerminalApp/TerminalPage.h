@@ -38,8 +38,8 @@ namespace winrt::TerminalApp::implementation
 
         void CloseWindow();
 
-        void DoStartupCommands(array_view<const TerminalApp::IStartupCommand> commands);
-        void DoStartupCommand(const TerminalApp::IStartupCommand& command);
+        void DoStartupActions(array_view<const TerminalApp::ActionAndArgs> actions);
+
         // -------------------------------- WinRT Events ---------------------------------
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(TitleChanged, _titleChangeHandlers, winrt::Windows::Foundation::IInspectable, winrt::hstring);
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(LastTabClosed, _lastTabClosedHandlers, winrt::Windows::Foundation::IInspectable, winrt::TerminalApp::LastTabClosedEventArgs);

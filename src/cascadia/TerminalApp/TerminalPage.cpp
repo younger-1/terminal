@@ -1366,20 +1366,20 @@ namespace winrt::TerminalApp::implementation
         _UpdateTabView();
     }
 
-    void TerminalPage::DoStartupCommands(array_view<const TerminalApp::IStartupCommand> commands)
+    void TerminalPage::DoStartupActions(array_view<const TerminalApp::ActionAndArgs> actions)
     {
         DebugBreak();
-        for (const auto& cmd : commands)
+        for (const auto& cmd : actions)
         {
             cmd;
         }
     }
 
-    void TerminalPage::DoStartupCommand(const TerminalApp::IStartupCommand& command)
-    {
-        DebugBreak();
-        command;
-    }
+    // void TerminalPage::DoStartupCommand(const TerminalApp::IStartupCommand& command)
+    // {
+    //     DebugBreak();
+    //     command;
+    // }
 
     // -------------------------------- WinRT Events ---------------------------------
     // Winrt events need a method for adding a callback to the event and removing the callback.

@@ -17,8 +17,5 @@ namespace TerminalApp
         event Windows.Foundation.TypedEventHandler<Object, Windows.UI.Xaml.UIElement> SetTitleBarContent;
         event Windows.Foundation.TypedEventHandler<Object, Windows.UI.Xaml.Controls.ContentDialog> ShowDialog;
         event Windows.Foundation.TypedEventHandler<Object, ToggleFullscreenEventArgs> ToggleFullscreen;
-
-        void DoStartupCommands(IStartupCommand[] commands);
-        void DoStartupCommand(IStartupCommand command);
     }
 }
