@@ -1,21 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../StartupCommands.idl";
+
 namespace TerminalApp
 {
-    [uuid("2A1C2BDE-1A60-4BAB-9765-D850F0EF2CAC")][version(1)] interface IStartupCommand{};
-
-    [default_interface] runtimeclass NewTabCommand : IStartupCommand
-    {
-        NewTabCommand();
-        String StartingDirectory;
-        String ProfileName;
-    }
-
-    // [default_interface] runtimeclass NewTabCommand : NewTerminalCommand
-    // {
-    // }
-
     delegate void LastTabClosedEventArgs();
     delegate void ToggleFullscreenEventArgs();
 
@@ -29,7 +18,7 @@ namespace TerminalApp
         event Windows.Foundation.TypedEventHandler<Object, Windows.UI.Xaml.Controls.ContentDialog> ShowDialog;
         event Windows.Foundation.TypedEventHandler<Object, ToggleFullscreenEventArgs> ToggleFullscreen;
 
-        // void DoStartupCommands(IStartupCommand[] commands);
+        void DoStartupCommands(IStartupCommand[] commands);
         void DoStartupCommand(IStartupCommand command);
     }
 }

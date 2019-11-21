@@ -21,10 +21,6 @@ AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
 {
     _ParseArgs(argc, argv);
 
-    // std::vector<winrt::TerminalApp::IStartupCommand> commands;
-    // commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
-    // commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
-
     _logic = _app.Logic(); // get a ref to app's logic
 
     _useNonClientArea = _logic.GetShowTabsInTitlebar();
@@ -38,7 +34,12 @@ AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
         _window = std::make_unique<IslandWindow>();
     }
 
-    _logic.SetStartupCommand(winrt::TerminalApp::NewTabCommand{});
+    std::vector<winrt::TerminalApp::IStartupCommand> commands;
+    commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
+    commands.emplace_back(winrt::TerminalApp::NewPaneCommand{});
+    commands.emplace_back(winrt::TerminalApp::FocusTabCommand{});
+    // _logic.SetStartupCommand(winrt::TerminalApp::NewTabCommand{});
+    _logic.SetStartupCommands(commands);
 
     // Tell the window to callback to us when it's about to handle a WM_CREATE
     auto pfn = std::bind(&AppHost::_HandleCreateWindow,

@@ -161,13 +161,16 @@ namespace winrt::TerminalApp::implementation
             TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
     }
 
-    // void AppLogic::SetStartupCommands(array_view<TerminalApp::IStartupCommand> commands)
+    void AppLogic::SetStartupCommands(array_view<const TerminalApp::IStartupCommand> commands)
+    {
+        for (auto cmd : commands)
+        {
+            _commands.push_back(cmd);
+        }
+    }
+
     void AppLogic::SetStartupCommand(const TerminalApp::IStartupCommand& command)
     {
-        // for (auto cmd : commands)
-        // {
-        //     _commands.push_back(cmd);
-        // }
         _command = command;
     }
 
@@ -308,8 +311,8 @@ namespace winrt::TerminalApp::implementation
     void AppLogic::_OnLoaded(const IInspectable& /*sender*/,
                              const RoutedEventArgs& /*eventArgs*/)
     {
-        // _root->DoStartupCommands({ _commands });
-        _root->DoStartupCommand(_command);
+        _root->DoStartupCommands({ _commands });
+        // _root->DoStartupCommand(_command);
 
         if (FAILED(_settingsLoadedResult))
         {

@@ -10,8 +10,7 @@
 #include "CascadiaSettings.h"
 #include "Profile.h"
 
-// #include "NewTerminalCommand.g.h"
-#include "NewTabCommand.g.h"
+#include "StartupCommands.h"
 
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Microsoft.Terminal.TerminalControl.h>
@@ -22,15 +21,6 @@
 
 namespace winrt::TerminalApp::implementation
 {
-    struct NewTabCommand : NewTabCommandT<NewTabCommand>
-    {
-    public:
-        NewTabCommand() = default;
-        ~NewTabCommand() = default;
-        GETSET_PROPERTY(winrt::hstring, StartingDirectory, L"");
-        GETSET_PROPERTY(winrt::hstring, ProfileName, L"");
-    };
-
     struct TerminalPage : TerminalPageT<TerminalPage>
     {
     public:
@@ -48,7 +38,7 @@ namespace winrt::TerminalApp::implementation
 
         void CloseWindow();
 
-        // void DoStartupCommands(array_view<TerminalApp::IStartupCommand> commands);
+        void DoStartupCommands(array_view<const TerminalApp::IStartupCommand> commands);
         void DoStartupCommand(const TerminalApp::IStartupCommand& command);
         // -------------------------------- WinRT Events ---------------------------------
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(TitleChanged, _titleChangeHandlers, winrt::Windows::Foundation::IInspectable, winrt::hstring);
@@ -177,5 +167,4 @@ namespace winrt::TerminalApp::factory_implementation
     struct TerminalPage : TerminalPageT<TerminalPage, implementation::TerminalPage>
     {
     };
-    BASIC_FACTORY(NewTabCommand);
 }

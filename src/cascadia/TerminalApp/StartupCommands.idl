@@ -1,0 +1,32 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+namespace TerminalApp
+{
+    [uuid("2A1C2BDE-1A60-4BAB-9765-D850F0EF2CAC")][version(1)] interface IStartupCommand{};
+
+    [default_interface] runtimeclass NewTerminalArgs {
+        NewTerminalArgs();
+        String StartingDirectory;
+        String ProfileName;
+        String Commandline;
+    };
+
+    [default_interface] runtimeclass NewTabCommand : IStartupCommand
+    {
+        NewTabCommand();
+        NewTerminalArgs TerminalArgs;
+    };
+
+    [default_interface] runtimeclass NewPaneCommand : IStartupCommand
+    {
+        NewPaneCommand();
+        NewTerminalArgs TerminalArgs;
+    };
+
+    [default_interface] runtimeclass FocusTabCommand : IStartupCommand
+    {
+        FocusTabCommand();
+        Windows.Foundation.IReference<Int32> Index { get; };
+    };
+}

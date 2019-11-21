@@ -21,7 +21,7 @@ namespace TerminalApp
         // registered?" when it definitely is.
         void Create();
 
-        // void SetStartupCommands(IStartupCommand[] commands);
+        void SetStartupCommands(IStartupCommand[] commands);
         void SetStartupCommand(IStartupCommand command);
 
         void LoadSettings();
