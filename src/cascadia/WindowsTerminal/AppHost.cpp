@@ -35,22 +35,9 @@ AppHost::AppHost(int argc, wchar_t* argv[]) noexcept :
         _window = std::make_unique<IslandWindow>();
     }
 
+    if (_appArgs._startupActions.size() > 0)
     {
-        std::vector<winrt::TerminalApp::ActionAndArgs> actions;
-        ActionAndArgs one, two, three;
-        one.Action(ShortcutAction::NewTab);
-        two.Action(ShortcutAction::SplitVertical);
-        three.Action(ShortcutAction::SplitHorizontal);
-        one.Args(NewTabArgs{});
-        // three.Action(ShortcutAction::MoveFocus);
-        actions.push_back(one);
-        actions.push_back(two);
-        actions.push_back(three);
-        // commands.emplace_back(winrt::TerminalApp::NewTabCommand{});
-        // commands.emplace_back(winrt::TerminalApp::NewPaneCommand{});
-        // commands.emplace_back(winrt::TerminalApp::MoveFocus{});
-        // _logic.SetStartupCommand(winrt::TerminalApp::NewTabCommand{});
-        _logic.SetStartupActions(actions);
+        _logic.SetStartupActions(_appArgs._startupActions);
     }
 
     // Tell the window to callback to us when it's about to handle a WM_CREATE

@@ -4,7 +4,7 @@
 #include "pch.h"
 
 #include <winrt/Microsoft.Terminal.TerminalControl.h>
-#include <winrt/TerminalApp.h>
+// #include <winrt/TerminalApp.h>
 
 #include "NonClientIslandWindow.h"
 

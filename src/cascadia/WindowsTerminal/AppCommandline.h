@@ -3,6 +3,8 @@
 
 // #include "pch.h"
 
+#include <winrt/TerminalApp.h>
+
 struct Cmdline
 {
     std::vector<std::wstring> wargs;
@@ -42,6 +44,8 @@ public:
 
     static std::vector<Cmdline> BuildCommands(int w_argc, wchar_t* w_argv[]);
 
+    std::vector<winrt::TerminalApp::ActionAndArgs> _startupActions;
+
 private:
     void _BuildParser();
     bool _NoCommandsProvided();
@@ -49,10 +53,13 @@ private:
 
     CLI::App _app{ "yeet, a test of the wt commandline" };
     CLI::App* _newTabCommand;
+    CLI::App* _newPaneCommand;
     CLI::App* _listProfilesCommand;
 
     std::string _profileName;
     std::string _startingDirectory;
     std::vector<std::string> _commandline;
+    bool _splitVertical{ false };
+    bool _splitHorizontal{ false };
     // Are you adding more args here? Make sure to reset them in _ResetStateToDefault
 };

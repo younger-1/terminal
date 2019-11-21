@@ -114,9 +114,36 @@ void AppCommandline::_BuildParser()
                 i++;
             }
         }
+
+        winrt::TerminalApp::ActionAndArgs newTabAction;
+        newTabAction.Action(winrt::TerminalApp::ShortcutAction::NewTab);
+        newTabAction.Args(winrt::TerminalApp::NewTabArgs{});
+        _startupActions.push_back(newTabAction);
     });
     ////////////////////////////////////////////////////////////////////////////
+    _newPaneCommand = _app.add_subcommand("new-pane", "Create a new pane");
+    _newPaneCommand->add_option("cmdline", _commandline, "Commandline to run in the given profile");
+    _newPaneCommand->add_option("-p,--profile", _profileName, "Open with the give profile");
+    _newPaneCommand->add_option("-d,--startingDirectory", _startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
 
+    auto* horizontalOpt = _newPaneCommand->add_option("-H,--horizontal", _splitHorizontal, "TODO");
+    auto* verticalOpt = _newPaneCommand->add_option("-V,--vertical", _splitVertical, "TODO");
+
+    verticalOpt->excludes(horizontalOpt);
+
+    _newPaneCommand->callback([&, this]() {
+        std::cout << "######################### new-pane #########################\n";
+        winrt::TerminalApp::ActionAndArgs newPaneAction;
+        if (_splitHorizontal)
+        {
+            newPaneAction.Action(winrt::TerminalApp::ShortcutAction::SplitHorizontal);
+        }
+        else
+        {
+            newPaneAction.Action(winrt::TerminalApp::ShortcutAction::SplitVertical);
+        }
+        _startupActions.push_back(newPaneAction);
+    });
     ////////////////////////////////////////////////////////////////////////////
     _listProfilesCommand = _app.add_subcommand("list-profiles", "List all the available profiles");
     ////////////////////////////////////////////////////////////////////////////
@@ -145,7 +172,10 @@ std::vector<Cmdline> AppCommandline::BuildCommands(int w_argc, wchar_t* w_argv[]
             auto remaining = nextFullArg;
             auto nextArg = remaining.substr(0, nextDelimiter);
             remaining = remaining.substr(nextDelimiter + 1);
-            commands.rbegin()->wargs.emplace_back(nextArg);
+            if (nextArg != L"")
+            {
+                commands.rbegin()->wargs.emplace_back(nextArg);
+            }
             do
             {
                 // TODO: For delimiters that are escaped, skip them and go to the next
@@ -153,7 +183,10 @@ std::vector<Cmdline> AppCommandline::BuildCommands(int w_argc, wchar_t* w_argv[]
                 commands.emplace_back(Cmdline{});
                 commands.rbegin()->wargs.emplace_back(std::wstring{ L"wt.exe" });
                 nextArg = remaining.substr(0, nextDelimiter);
-                commands.rbegin()->wargs.emplace_back(nextArg);
+                if (nextArg != L"")
+                {
+                    commands.rbegin()->wargs.emplace_back(nextArg);
+                }
                 remaining = remaining.substr(nextDelimiter + 1);
             } while (nextDelimiter != std::wstring::npos);
         }
