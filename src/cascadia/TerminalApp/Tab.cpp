@@ -220,7 +220,6 @@ bool Tab::CanSplitPane(Pane::SplitState splitType)
 void Tab::SplitPane(Pane::SplitState splitType, const GUID& profile, TermControl& control)
 {
     auto [first, second] = _activePane->Split(splitType, profile, control);
-    _activePane = first;
 
     _AttachEventHandlersToControl(control);
 
