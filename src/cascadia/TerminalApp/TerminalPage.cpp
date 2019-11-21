@@ -110,22 +110,61 @@ namespace winrt::TerminalApp::implementation
 
         _tabContent.SizeChanged({ this, &TerminalPage::_OnContentSizeChanged });
 
-        // Actually start the terminal.
-        if (_startupActions.size() == 0)
-        {
-            _OpenNewTab(std::nullopt);
-        }
-        else
-        {
-            _ProcessNextStartupAction();
-            // // DebugBreak();
-            // Dispatcher().RunAsync(CoreDispatcherPriority::Low, [this]() {
-            //     for (const auto& action : _startupActions)
-            //     {
-            //         _actionDispatch.DoAction(action);
-            //     }
-            // });
-        }
+        // Initialize the terminal only once the swapchainpanel is loaded - that
+        //      way, we'll be able to query the real pixel size it got on layout
+        // _layoutUpdatedRevoker = this->LayoutUpdated(winrt::auto_revoke, [this](auto /*s*/, auto /*e*/) {
+        _layoutUpdatedRevoker = _tabContent.LayoutUpdated(winrt::auto_revoke, [this](auto /*s*/, auto /*e*/) {
+            Windows::Foundation::Size actualSize{ gsl::narrow_cast<float>(_tabContent.ActualWidth()),
+                                                  gsl::narrow_cast<float>(_tabContent.ActualHeight()) };
+            actualSize;
+            // Only let this succeed once.
+            this->_layoutUpdatedRevoker.revoke();
+
+            // This event fires every time the layout changes, but it is always the last one to fire
+            // in any layout change chain. That gives us great flexibility in finding the right point
+            // at which to initialize our renderer (and our terminal).
+            // Any earlier than the last layout update and we may not know the terminal's starting size.
+            if (_startupState == StartupState::NotInitialized)
+            {
+                _startupState = StartupState::InStartup;
+                if (_startupActions.size() == 0)
+                {
+                    _OpenNewTab(std::nullopt);
+                    _startupState = StartupState::Initialized;
+                }
+                else
+                {
+                    Dispatcher().RunAsync(CoreDispatcherPriority::Low, [this]() {
+                        for (const auto& action : _startupActions)
+                        {
+                            // Dispatcher().RunAsync(CoreDispatcherPriority::Normal, [this, action]() {
+                            _actionDispatch.DoAction(action);
+                            // });
+                        }
+                        _startupState = StartupState::Initialized;
+                    });
+                }
+            }
+        });
+
+        // // Actually start the terminal.
+        // if (_startupActions.size() == 0)
+        // {
+        //     _OpenNewTab(std::nullopt);
+        // }
+        // else
+        // {
+        //     // _ProcessNextStartupAction();
+        //     // // DebugBreak();
+        //     Dispatcher().RunAsync(CoreDispatcherPriority::Low, [this]() {
+        //         _startupState = StartupState::InStartup;
+        //         for (const auto& action : _startupActions)
+        //         {
+        //             _actionDispatch.DoAction(action);
+        //         }
+        //         _startupState = StartupState::Initialized;
+        //     });
+        // }
     }
 
     void TerminalPage::_ProcessNextStartupAction()
@@ -431,6 +470,11 @@ namespace winrt::TerminalApp::implementation
             TraceLoggingGuid(profileGuid, "ProfileGuid", "The GUID of the profile spawned in the new tab"),
             TraceLoggingKeyword(MICROSOFT_KEYWORD_MEASURES),
             TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
+
+        // if (_tabs.size() == 1)
+        // {
+        //     _tabContent.Children().Append(tab->GetRootElement());
+        // }
     }
 
     // Method Description:
@@ -440,6 +484,8 @@ namespace winrt::TerminalApp::implementation
     // - settings: the TerminalSettings object to use to create the TerminalControl with.
     void TerminalPage::_CreateNewTabFromSettings(GUID profileGuid, TerminalSettings settings)
     {
+        const bool isFirstTab = _tabs.size() == 0;
+
         // Initialize the new tab
 
         // Create a connection based on the values in our settings object.
@@ -492,9 +538,16 @@ namespace winrt::TerminalApp::implementation
         // This is one way to set the tab's selected background color.
         //   tabViewItem.Resources().Insert(winrt::box_value(L"TabViewItemHeaderBackgroundSelected"), a Brush?);
 
-        // This kicks off TabView::SelectionChanged, in response to which we'll attach the terminal's
-        // Xaml control to the Xaml root.
-        _tabView.SelectedItem(tabViewItem);
+        if (isFirstTab)
+        {
+            _tabContent.Children().Append(newTab->GetRootElement());
+        }
+        else
+        {
+            // This kicks off TabView::SelectionChanged, in response to which we'll attach the terminal's
+            // Xaml control to the Xaml root.
+            _tabView.SelectedItem(tabViewItem);
+        }
     }
 
     // Method Description:
@@ -776,9 +829,9 @@ namespace winrt::TerminalApp::implementation
         // Add an event handler when the terminal wants to paste data from the Clipboard.
         term.PasteFromClipboard({ this, &TerminalPage::_PasteFromClipboardHandler });
 
-        term.Initialized([this](auto&&, auto&&) {
-            _ProcessNextStartupAction();
-        });
+        // term.Initialized([this](auto&&, auto&&) {
+        //     _ProcessNextStartupAction();
+        // });
     }
 
     // Method Description:
@@ -965,7 +1018,7 @@ namespace winrt::TerminalApp::implementation
 
         const auto canSplit = focusedTab->CanSplitPane(splitType);
 
-        if (!canSplit)
+        if (!canSplit && (_startupState == StartupState::Initialized))
         {
             return;
         }

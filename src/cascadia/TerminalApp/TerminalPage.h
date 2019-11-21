@@ -21,6 +21,13 @@
 
 namespace winrt::TerminalApp::implementation
 {
+    enum StartupState : int
+    {
+        NotInitialized = 0,
+        InStartup = 1,
+        Initialized = 2
+    };
+
     struct TerminalPage : TerminalPageT<TerminalPage>
     {
     public:
@@ -71,7 +78,10 @@ namespace winrt::TerminalApp::implementation
 
         ShortcutActionDispatch _actionDispatch{};
 
+        winrt::Windows::UI::Xaml::Controls::Grid::LayoutUpdated_revoker _layoutUpdatedRevoker;
+
         std::deque<TerminalApp::ActionAndArgs> _startupActions;
+        StartupState _startupState{ StartupState::NotInitialized };
         void _ProcessNextStartupAction();
 
         void _ShowAboutDialog();
