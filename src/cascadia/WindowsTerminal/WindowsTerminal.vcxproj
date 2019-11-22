@@ -71,7 +71,7 @@
     <ClInclude Include="AppHost.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="IslandWindow.h" />
-    <ClInclude Include="AppCommandline.h" />
+    <!-- <ClInclude Include="AppCommandline.h" /> -->
     <ClInclude Include="NonClientIslandWindow.h" />
     <ClInclude Include="WindowUiaProvider.hpp" />
   </ItemGroup>
@@ -82,7 +82,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AppHost.cpp" />
     <ClCompile Include="IslandWindow.cpp" />
-    <ClCompile Include="AppCommandline.cpp" />
+    <!-- <ClCompile Include="AppCommandline.cpp" /> -->
     <ClCompile Include="NonClientIslandWindow.cpp" />
     <ClCompile Include="WindowUiaProvider.cpp" />
   </ItemGroup>
@@ -106,6 +106,10 @@
     <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalApp\TerminalApp.vcxproj" />
 
     <ProjectReference Include="$(OpenConsoleDir)src\types\lib\types.vcxproj" />
+
+    <ProjectReference Include="..\WindowsTerminal\lib\WindowsTerminalLib.vcxproj">
+      <Project>{d9614fac-d9f0-4e19-9bfc-397ceab2b6a3}</Project>
+    </ProjectReference>
   </ItemGroup>
 
   <!--

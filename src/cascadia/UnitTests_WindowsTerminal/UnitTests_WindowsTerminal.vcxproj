@@ -58,11 +58,14 @@
     <ProjectReference Include="..\TerminalCore\lib\TerminalCore-lib.vcxproj">
       <Project>{ca5cad1a-abcd-429c-b551-8562ec954746}</Project>
     </ProjectReference> -->
-    <ProjectReference Include="..\WindowsTerminal\WindowsTerminal.vcxproj">
+    <!-- <ProjectReference Include="..\WindowsTerminal\WindowsTerminal.vcxproj">
       <Project>{CA5CAD1A-1754-4A9D-93D7-857A9D17CB1B}</Project>
+    </ProjectReference> -->
+    <ProjectReference Include="..\WindowsTerminal\lib\WindowsTerminalLib.vcxproj">
+      <Project>{d9614fac-d9f0-4e19-9bfc-397ceab2b6a3}</Project>
     </ProjectReference>
-    <ProjectReference Include="$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\TerminalAppLib.vcxproj" />
-    <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalApp\TerminalApp.vcxproj" />
+    <!-- <ProjectReference Include="$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\TerminalAppLib.vcxproj" /> -->
+    <!-- <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalApp\TerminalApp.vcxproj" /> -->
 
   </ItemGroup>
   <ItemGroup>
