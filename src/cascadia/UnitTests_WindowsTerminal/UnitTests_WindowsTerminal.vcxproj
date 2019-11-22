@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{73d6af5c-527d-4170-b357-5805a4b5cb3c}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>WindowsTerminalUnitTests</RootNamespace>
+    <ProjectName>UnitTests_WindowsTerminal</ProjectName>
+    <TargetName>WindowsTerminal.Unit.Tests</TargetName>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+  <!-- Manually change our outdir to be in a subdirectory. We don't really want
+    to put our output in the bin root, because if we do, we'll copy
+    TerminalApp.winmd to the bin root, and then every subsequent mdmerge step
+    (in _any_ cppwinrt project) will automatically try to pick up
+    TerminalApp.winmd as a dependency (which is just wrong). This MUST be done
+    before importing common.build.pre.props -->
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)\common.openconsole.props" Condition="'$(OpenConsoleDir)'==''" />
+  <Import Project="$(SolutionDir)\src\common.build.pre.props" />
+
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- For CLI11: It uses dynamic_cast to cast types around, which depends
+      on being compiled with RTTI (/GR). I don't know what kind of hit this has
+      on us. -->
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="CommandlineTest.cpp" />
+    <ClCompile Include="precomp.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+<!--     <ProjectReference Include="..\..\buffer\out\lib\bufferout.vcxproj">
+      <Project>{0cf235bd-2da0-407e-90ee-c467e8bbc714}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\renderer\base\lib\base.vcxproj">
+      <Project>{af0a096a-8b3a-4949-81ef-7df8f0fee91f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\terminal\input\lib\terminalinput.vcxproj">
+      <Project>{1cf55140-ef6a-4736-a403-957e4f7430bb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\terminal\parser\lib\parser.vcxproj">
+      <Project>{3ae13314-1939-4dfa-9c14-38ca0834050c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\types\lib\types.vcxproj">
+      <Project>{18d09a24-8240-42d6-8cb6-236eee820263}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TerminalCore\lib\TerminalCore-lib.vcxproj">
+      <Project>{ca5cad1a-abcd-429c-b551-8562ec954746}</Project>
+    </ProjectReference> -->
+    <ProjectReference Include="..\WindowsTerminal\WindowsTerminal.vcxproj">
+      <Project>{CA5CAD1A-1754-4A9D-93D7-857A9D17CB1B}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\TerminalAppLib.vcxproj" />
+    <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalApp\TerminalApp.vcxproj" />
+
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="precomp.h" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>
+        ..;
+        $(SolutionDir)src\inc;
+        $(SolutionDir)src\inc\test;
+        $(WinRT_IncludePath)\..\cppwinrt\winrt;
+        "$(OpenConsoleDir)\src\cascadia\TerminalSettings\Generated Files";
+        "$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\Generated Files";
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- Careful reordering these. Some default props (contained in these files) are order sensitive. -->
+  <Import Project="$(SolutionDir)src\common.build.post.props" />
+  <Import Project="$(SolutionDir)src\common.build.tests.props" />
+
+
+
+  <!-- This project will generate individual sxs manifests for each of our winrt libraries -->
+  <Import Project="$(OpenConsoleDir)\build\rules\GenerateSxsManifestsFromWinmds.targets" />
+
+  <!-- This is important: actually add the _LocalTestsGenerateCombinedManifests
+    target to the list of targets to run. -->
+  <PropertyGroup>
+    <BeforeLinkTargets Condition="'$(WindowsTargetPlatformVersion)' &gt;= '10.0.18362.0'">
+      $(BeforeLinkTargets);
+      _LocalTestsGenerateCombinedManifests;
+      _LocalTestsBuildAppxManifest;
+      _LocalTestsCopyDependencies;
+    </BeforeLinkTargets>
+  </PropertyGroup>
+
+  <!-- Step 1: Combine all our SxS manifests into a single SxS manifest. TAEF
+  needs us to specify a single activation context at runtime, so we need a
+  single file with all our types in it.-->
+  <Target Name="_LocalTestsGenerateCombinedManifests"
+          Inputs="@(_ConsoleWinmdManifest)"
+          Outputs="$(OutDir)$(TargetName).manifest"
+          DependsOnTargets="_ConsoleGenerateAdditionalWinmdManifests">
+
+    <Exec Command="mt.exe -manifest @(_ConsoleWinmdManifest, ' -manifest ') -out:$(OutDir)$(TargetName).manifest" />
+  </Target>
+
+  <!-- Step 2: Take our combined SxS manifest, and use it to build an
+  Appxmanifest.xml. We'll use the Appxmanifest.prototype.xml in this project's
+  directory as a base, and the script will tak all our activatableClasses and
+  turn them into appxmanifest-compatible Extensions -->
+  <Target Name="_LocalTestsBuildAppxManifest"
+          Inputs="$(OutDir)$(TargetName).manifest"
+          Outputs="$(OutDir)$(TargetName).AppxManifest.xml"
+          DependsOnTargets="_LocalTestsGenerateCombinedManifests">
+
+    <Exec Command="powershell.exe -noprofile –ExecutionPolicy Unrestricted $(OpenConsoleDir)\tools\GenerateAppxFromManifest.ps1 -SxSManifest $(OutDir)$(TargetName).manifest -AppxManifestPrototype $(TargetName).AppxManifest.prototype.xml -OutPath $(OutDir)$(TargetName).AppxManifest.xml" />
+
+  </Target>
+
+  <!-- Step 3: Manually copy all our dependent DLLs into our OutDir. For SxS
+  activation to work, they all need to be in the same directory as our test dll.
+  This is using code that's heavliy cribbed from WindowsTerminal.vcxproj, which
+  is already cribbed from the GetPackagingOutputs in
+  Microsoft.*.AppxPackage.targets. We're filtering this list down to the dlls,
+  pris and xbfs, because this list _can_ contain directories, which will make
+  the Copy task explode. -->
+
+  <PropertyGroup>
+    <_ContinueOnError Condition="'$(BuildingProject)' == 'true'">true</_ContinueOnError>
+    <_ContinueOnError Condition="'$(BuildingProject)' != 'true'">false</_ContinueOnError>
+  </PropertyGroup>
+
+  <!-- First gather the files... -->
+  <Target Name="MyGetPackagingOutputs" Returns="@(MyPackagingOutputs)">
+    <MSBuild
+      Projects="@(ProjectReferenceWithConfiguration)"
+      Targets="GetPackagingOutputs"
+      BuildInParallel="$(BuildInParallel)"
+      Properties="%(ProjectReferenceWithConfiguration.SetConfiguration); %(ProjectReferenceWithConfiguration.SetPlatform)"
+      Condition="'@(ProjectReferenceWithConfiguration)' != ''
+                 and '%(ProjectReferenceWithConfiguration.BuildReference)' == 'true'
+                 and '%(ProjectReferenceWithConfiguration.ReferenceOutputAssembly)' == 'true'"
+      ContinueOnError="$(_ContinueOnError)">
+      <Output TaskParameter="TargetOutputs" ItemName="_PackagingOutputsFromOtherProjects"/>
+    </MSBuild>
+
+    <ItemGroup>
+      <MyPackagingOutputs Include="@(_PackagingOutputsFromOtherProjects)" Condition="'%(Extension)'=='.dll' Or '%(Extension)'=='.pri' Or '%(Extension)'=='.xbf'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Then copy the files to our outdir -->
+  <Target Name="_LocalTestsCopyDependencies"
+          DependsOnTargets="MyGetPackagingOutputs">
+
+    <Copy SourceFiles="@(MyPackagingOutputs)"
+          SkipUnchangedFiles="true"
+          DestinationFolder="$(OutDir)"
+    />
+  </Target>
+
+
+</Project>
