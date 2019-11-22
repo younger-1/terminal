@@ -308,19 +308,13 @@ void AppHost::_ParseArgs(int argc, wchar_t* argv[])
         //
         // So we pretty much need the to either manually reset the state each
         // command, or build new ones.
-        auto result = _appArgs.ParseCommand(cmdBlob);
+        const auto result = _appArgs.ParseCommand(cmdBlob);
         if (result != 0)
         {
             exit(result);
         }
-        // DONT
-        // On success, reset the appArgs state, so we can parse again.
-        // Instead just do this every ParseCommand()
     }
 
-    // If all the args were successfully parsed, we'll have some commands built in _appArgs
-
-    // std::cout << "\nThanks for using yeet!\n"
-    //           << std::endl;
-    // exit(0);
+    // If all the args were successfully parsed, we'll have some commands built
+    // in _appArgs, which we'll use when the application starts up.
 }

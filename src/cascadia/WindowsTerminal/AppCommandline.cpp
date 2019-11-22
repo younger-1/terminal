@@ -126,8 +126,8 @@ void AppCommandline::_BuildParser()
     _newPaneCommand->add_option("-p,--profile", _profileName, "Open with the give profile");
     _newPaneCommand->add_option("-d,--startingDirectory", _startingDirectory, "Open in the given directory instead of the profile's set startingDirectory");
 
-    auto* horizontalOpt = _newPaneCommand->add_option("-H,--horizontal", _splitHorizontal, "TODO");
-    auto* verticalOpt = _newPaneCommand->add_option("-V,--vertical", _splitVertical, "TODO");
+    auto* horizontalOpt = _newPaneCommand->add_flag("-H,--horizontal", _splitHorizontal, "TODO");
+    auto* verticalOpt = _newPaneCommand->add_flag("-V,--vertical", _splitVertical, "TODO");
 
     verticalOpt->excludes(horizontalOpt);
 
@@ -151,7 +151,9 @@ void AppCommandline::_BuildParser()
 
 bool AppCommandline::_NoCommandsProvided()
 {
-    return !(*_listProfilesCommand || *_newTabCommand);
+    return !(*_listProfilesCommand ||
+             *_newTabCommand ||
+             *_newPaneCommand);
 }
 
 std::vector<Cmdline> AppCommandline::BuildCommands(int w_argc, wchar_t* w_argv[])

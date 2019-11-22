@@ -50,9 +50,11 @@ private:
     void _ResetStateToDefault();
 
     CLI::App _app{ "yeet, a test of the wt commandline" };
+    // --- Subcommands ---
     CLI::App* _newTabCommand;
     CLI::App* _newPaneCommand;
     CLI::App* _listProfilesCommand;
+    // Are you adding a new sub-command? Make sure to update _NoCommandsProvided!
 
     std::string _profileName;
     std::string _startingDirectory;

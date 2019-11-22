@@ -20,6 +20,10 @@ namespace WindowsTerminalUnitTests
         TEST_CLASS(CommandlineTest);
         TEST_METHOD(TryCreateWinRTType);
         TEST_METHOD(ParseSimmpleCommandline);
+
+        TEST_METHOD(ParseBasicCommandlineIntoArgs);
+        TEST_METHOD(ParseNewPaneIntoArgs);
+        TEST_METHOD(ParseComboCommandlineIntoArgs);
     };
 
     void CommandlineTest::TryCreateWinRTType()
@@ -95,5 +99,84 @@ namespace WindowsTerminalUnitTests
             VERIFY_ARE_EQUAL(1u, commandlines.at(2).argc());
             VERIFY_ARE_EQUAL(L"wt.exe", commandlines.at(2).Wargs().at(0));
         }
+    }
+
+    void CommandlineTest::ParseBasicCommandlineIntoArgs()
+    {
+        AppCommandline appArgs{};
+        std::vector<wchar_t*> rawCommands{ L"wt.exe", L"new-tab" };
+        auto commandlines = AppCommandline::BuildCommands(static_cast<int>(rawCommands.size()), rawCommands.data());
+        VERIFY_ARE_EQUAL(1u, commandlines.size());
+        for (auto& cmdBlob : commandlines)
+        {
+            cmdBlob.BuildArgv();
+            const auto result = appArgs.ParseCommand(cmdBlob);
+            VERIFY_ARE_EQUAL(0, result);
+        }
+        VERIFY_ARE_EQUAL(1, appArgs._startupActions.size());
+        VERIFY_ARE_EQUAL(ShortcutAction::NewTab, appArgs._startupActions.at(0).Action());
+    }
+
+    void CommandlineTest::ParseNewPaneIntoArgs()
+    {
+        {
+            AppCommandline appArgs{};
+            std::vector<wchar_t*> rawCommands{ L"wt.exe", L"new-pane" };
+            auto commandlines = AppCommandline::BuildCommands(static_cast<int>(rawCommands.size()), rawCommands.data());
+            VERIFY_ARE_EQUAL(1u, commandlines.size());
+            for (auto& cmdBlob : commandlines)
+            {
+                cmdBlob.BuildArgv();
+                const auto result = appArgs.ParseCommand(cmdBlob);
+                VERIFY_ARE_EQUAL(0, result);
+            }
+            VERIFY_ARE_EQUAL(1, appArgs._startupActions.size());
+            VERIFY_ARE_EQUAL(ShortcutAction::SplitVertical, appArgs._startupActions.at(0).Action());
+        }
+        {
+            AppCommandline appArgs{};
+            std::vector<wchar_t*> rawCommands{ L"wt.exe", L"new-pane", L"-H" };
+            auto commandlines = AppCommandline::BuildCommands(static_cast<int>(rawCommands.size()), rawCommands.data());
+            VERIFY_ARE_EQUAL(1u, commandlines.size());
+            for (auto& cmdBlob : commandlines)
+            {
+                cmdBlob.BuildArgv();
+                const auto result = appArgs.ParseCommand(cmdBlob);
+                VERIFY_ARE_EQUAL(0, result);
+            }
+            VERIFY_ARE_EQUAL(1, appArgs._startupActions.size());
+            VERIFY_ARE_EQUAL(ShortcutAction::SplitHorizontal, appArgs._startupActions.at(0).Action());
+        }
+        {
+            AppCommandline appArgs{};
+            std::vector<wchar_t*> rawCommands{ L"wt.exe", L"new-pane", L"-V" };
+            auto commandlines = AppCommandline::BuildCommands(static_cast<int>(rawCommands.size()), rawCommands.data());
+            VERIFY_ARE_EQUAL(1u, commandlines.size());
+            for (auto& cmdBlob : commandlines)
+            {
+                cmdBlob.BuildArgv();
+                const auto result = appArgs.ParseCommand(cmdBlob);
+                VERIFY_ARE_EQUAL(0, result);
+            }
+            VERIFY_ARE_EQUAL(1, appArgs._startupActions.size());
+            VERIFY_ARE_EQUAL(ShortcutAction::SplitVertical, appArgs._startupActions.at(0).Action());
+        }
+    }
+
+    void CommandlineTest::ParseComboCommandlineIntoArgs()
+    {
+        AppCommandline appArgs{};
+        std::vector<wchar_t*> rawCommands{ L"wt.exe", L"new-tab", L";", L"new-pane" };
+        auto commandlines = AppCommandline::BuildCommands(static_cast<int>(rawCommands.size()), rawCommands.data());
+        VERIFY_ARE_EQUAL(2u, commandlines.size());
+        for (auto& cmdBlob : commandlines)
+        {
+            cmdBlob.BuildArgv();
+            const auto result = appArgs.ParseCommand(cmdBlob);
+            VERIFY_ARE_EQUAL(0, result);
+        }
+        VERIFY_ARE_EQUAL(2, appArgs._startupActions.size());
+        VERIFY_ARE_EQUAL(ShortcutAction::NewTab, appArgs._startupActions.at(0).Action());
+        VERIFY_ARE_EQUAL(ShortcutAction::SplitVertical, appArgs._startupActions.at(1).Action());
     }
 }
