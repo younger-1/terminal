@@ -1,8 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-
-// #include "pch.h"
-
 #include <winrt/TerminalApp.h>
 
 struct Cmdline
@@ -11,6 +8,7 @@ struct Cmdline
     char** _argv = nullptr;
     size_t argc() const { return wargs.size(); }
     char** Argv() const { return _argv; }
+    const std::vector<std::wstring>& Wargs() const { return wargs; };
     char** BuildArgv()
     {
         // If we've already build our array of args, then we don't need to worry
