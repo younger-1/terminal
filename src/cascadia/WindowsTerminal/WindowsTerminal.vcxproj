@@ -65,24 +65,27 @@
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <!-- Source Files -->
+
+  <!-- Are you trying to add a class that you want unit-tested? make sure to put
+  it in WindowsTerminal.common.vcxitems instead! -->
+  <Import Project="$(OpenConsoleDir)src\cascadia\WindowsTerminal\WindowsTerminal.common.vcxitems" />
+
   <ItemGroup>
-    <ClInclude Include="pch.h" />
+    <!-- <ClInclude Include="pch.h" /> -->
     <ClInclude Include="resource.h" />
     <ClInclude Include="AppHost.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="IslandWindow.h" />
-    <ClInclude Include="AppCommandline.h" />
     <ClInclude Include="NonClientIslandWindow.h" />
     <ClInclude Include="WindowUiaProvider.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
+    <!-- <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
+    </ClCompile> -->
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AppHost.cpp" />
     <ClCompile Include="IslandWindow.cpp" />
-    <ClCompile Include="AppCommandline.cpp" />
     <ClCompile Include="NonClientIslandWindow.cpp" />
     <ClCompile Include="WindowUiaProvider.cpp" />
   </ItemGroup>

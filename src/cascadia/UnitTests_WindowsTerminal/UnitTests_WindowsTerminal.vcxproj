@@ -33,11 +33,13 @@
     </ClCompile>
   </ItemDefinitionGroup>
 
+  <Import Project="$(OpenConsoleDir)src\cascadia\WindowsTerminal\WindowsTerminal.common.vcxitems" />
+
   <ItemGroup>
     <ClCompile Include="CommandlineTest.cpp" />
-    <ClCompile Include="precomp.cpp">
+    <!-- <ClCompile Include="precomp.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
+    </ClCompile> -->
   </ItemGroup>
   <ItemGroup>
 <!--     <ProjectReference Include="..\..\buffer\out\lib\bufferout.vcxproj">
@@ -58,15 +60,18 @@
     <ProjectReference Include="..\TerminalCore\lib\TerminalCore-lib.vcxproj">
       <Project>{ca5cad1a-abcd-429c-b551-8562ec954746}</Project>
     </ProjectReference> -->
-    <ProjectReference Include="..\WindowsTerminal\WindowsTerminal.vcxproj">
+
+    <!-- <ProjectReference Include="..\WindowsTerminal\WindowsTerminal.vcxproj">
       <Project>{CA5CAD1A-1754-4A9D-93D7-857A9D17CB1B}</Project>
-    </ProjectReference>
+    </ProjectReference> -->
+
     <ProjectReference Include="$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\TerminalAppLib.vcxproj" />
+
     <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalApp\TerminalApp.vcxproj" />
 
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="precomp.h" />
+    <!-- <ClInclude Include="precomp.h" /> -->
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -79,7 +84,7 @@
         "$(OpenConsoleDir)\src\cascadia\TerminalApp\lib\Generated Files";
         %(AdditionalIncludeDirectories)
       </AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
