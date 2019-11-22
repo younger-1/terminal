@@ -6,7 +6,7 @@
 
 #include "consoletaeftemplates.hpp"
 #include "../WindowsTerminal/AppCommandline.h"
-#include <winrt/TerminalApp.h>
+// #include <winrt/TerminalApp.h>
 
 using namespace WEX::Logging;
 using namespace WEX::TestExecution;
@@ -35,6 +35,18 @@ namespace WindowsTerminalUnitTests
 
     void CommandlineTest::ParseSimmpleCommandline()
     {
-        VERIFY_IS_TRUE(false);
+        {
+            wchar_t* rawCommands[]{ L"wt.exe" };
+            auto commandlines = AppCommandline::BuildCommands(1, rawCommands);
+            VERIFY_ARE_EQUAL(1u, commandlines.size());
+            VERIFY_ARE_EQUAL(1u, commandlines.at(0).argc());
+        }
+        {
+            wchar_t* rawCommands[]{ L"wt.exe", L"an arg with spaces" };
+
+            auto commandlines = AppCommandline::BuildCommands(1, rawCommands);
+            VERIFY_ARE_EQUAL(1u, commandlines.size());
+            VERIFY_ARE_EQUAL(2u, commandlines.at(0).argc());
+        }
     }
 }
