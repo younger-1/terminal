@@ -752,7 +752,8 @@ IFACEMETHODIMP UiaTextRangeBase::MoveEndpointByRange(_In_ TextPatternRangeEndpoi
         // their start position because this operation treats it as exclusive.
         if (endpoint == TextPatternRangeEndpoint::TextPatternRangeEndpoint_End)
         {
-            if (targetEndpointValue > 0)
+            // don't accidentally wrap if at left margin
+            if (targetEndpointValue > 0 && _endpointToColumn(_pData, targetEndpointValue) != 0)
             {
                 targetEndpointValue--;
             }
@@ -766,7 +767,11 @@ IFACEMETHODIMP UiaTextRangeBase::MoveEndpointByRange(_In_ TextPatternRangeEndpoi
         // their end position as it was stored inclusive and we're doing this as an exclusive operation.
         if (endpoint == TextPatternRangeEndpoint::TextPatternRangeEndpoint_Start)
         {
-            targetEndpointValue++;
+            // don't accidentally wrap if at right margin
+            if (_endpointToColumn(_pData, targetEndpointValue + 1) != 0)
+            {
+                targetEndpointValue++;
+            }
         }
     }
 
